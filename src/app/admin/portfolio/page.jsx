@@ -1,6 +1,10 @@
 "use client";
-
-import { useState } from "react";
+import {
+    createPortfolio,
+    getPortfolios,
+    updatePortfolio,
+    deletePortfolio as removePortfolio
+} from "@/lib/api/portfolio";
 import { motion } from "framer-motion";
 import {
     Plus,
@@ -11,7 +15,7 @@ import {
     Image as ImageIcon,
     FolderKanban,
 } from "lucide-react";
-
+import { useState, useEffect } from "react";
 
 const initialProjects = [
     {
@@ -47,13 +51,60 @@ const initialProjects = [
 export default function Portfolio() {
 
 
-    const [projects, setProjects] = useState(initialProjects);
+
+    const deleteProject = async (id) => {
+
+        console.log("Delete Clicked ID:", id);
+
+        try {
+
+            await removePortfolio(id);
+
+            console.log("Deleted Successfully");
+
+
+            setProjects(
+                projects.filter(
+                    project => project.id !== id
+                )
+            );
+
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
+    };
+    const [projects, setProjects] = useState([]);
     const [editingId, setEditingId] = useState(null);
 
     const [search, setSearch] = useState("");
 
     const [filter, setFilter] = useState("All");
 
+    useEffect(() => {
+
+        fetchProjects();
+
+    }, []);
+
+    const fetchProjects = async () => {
+
+        try {
+
+            const data = await getPortfolios();
+
+            setProjects(data);
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
+    };
 
     const categories = [
         "All",
@@ -83,13 +134,14 @@ export default function Portfolio() {
 
         if (file) {
 
-            const url = URL.createObjectURL(file);
+            setPreview(
+                URL.createObjectURL(file)
+            );
 
-            setPreview(url);
 
             setForm({
                 ...form,
-                image: url
+                image: file
             });
 
         }
@@ -97,16 +149,49 @@ export default function Portfolio() {
     };
 
 
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
 
         e.preventDefault();
 
-
         if (!form.title) return;
 
+        try {
+            const formData = new FormData();
+
+            formData.append("title", form.title);
+            formData.append("category", form.category);
+            formData.append("description", form.description);
+            formData.append("project_url", form.live);
+            formData.append("github_url", form.code);
+            if (form.image) {
+
+                formData.append(
+                    "image",
+                    form.image
+                );
+
+            }
+            if (editingId) {
+
+                await updatePortfolio(editingId, formData);
+
+            }
+            else {
+
+                await createPortfolio(formData);
+
+            }
 
 
+            await fetchProjects();
+            console.log("Database Saved:");
+
+        } catch (error) {
+            console.log(error.response?.data);
+            return;
+        }
+
+        // 👇 Iske neeche tumhara existing code bilkul waise hi raheg
         if (editingId) {
 
 
@@ -129,21 +214,7 @@ export default function Portfolio() {
 
         }
         else {
-
-
-            const newProject = {
-
-                id: Date.now(),
-                ...form,
-
-            };
-
-
-            setProjects([
-                newProject,
-                ...projects
-            ]);
-
+           await fetchProjects();
 
         }
 

@@ -1,5 +1,7 @@
 "use client";
-
+import { useRouter } from "next/navigation";
+import apiClient from "@/lib/api/apiClient";
+import { logout } from "@/lib/api/auth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -16,6 +18,7 @@ import {
     LogOut,
     Newspaper,
 } from "lucide-react";
+
 
 const menu = [
 
@@ -69,9 +72,28 @@ const menu = [
 ];
 
 export default function Sidebar() {
-    console.log(menu)
-    console.log("Sidebar Updated");
     const pathname = usePathname();
+    const router = useRouter();
+    const handleLogout = async () => {
+        console.log("1");
+
+        try {
+            console.log("2");
+
+            const response = await apiClient.post("/logout");
+
+            console.log("3", response);
+
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+
+            router.replace("/login");
+        } catch (error) {
+            console.log("4", error);
+        }
+
+        console.log("5");
+    };
 
     return (
 
@@ -237,7 +259,7 @@ export default function Sidebar() {
             <div className="border-t border-white/10 p-5">
 
                 <div className="space-y-2">
-                   <Link href="/admin/settings">
+                    <Link href="/admin/settings">
                         <button
                             className="
                             flex
@@ -262,20 +284,20 @@ export default function Sidebar() {
                     </Link>
                     <button
                         className="
-                            flex
-                            w-full
-                            items-center
-                            gap-4
-                            rounded-2xl
-                            px-4
-                            py-3
-                            text-red-400
-                            transition-all
-                            duration-300
-                            hover:bg-red-500/10
-                        "
+        flex
+        w-full
+        items-center
+        gap-4
+        rounded-2xl
+        px-4
+        py-3
+        text-red-400
+        transition-all
+        duration-300
+        hover:bg-red-500/10
+    "
+                        onClick={handleLogout}
                     >
-
                         <LogOut size={20} />
 
                         <span>Logout</span>

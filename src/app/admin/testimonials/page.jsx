@@ -1,6 +1,4 @@
 "use client";
-
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
     Plus,
@@ -10,6 +8,14 @@ import {
     MessageSquare
 } from "lucide-react";
 
+import {
+    getTestimonials,
+    createTestimonial,
+    updateTestimonial,
+    deleteTestimonial,
+} from "@/lib/api/testimonials";
+
+import { useEffect, useState } from "react";
 
 const initialTestimonials = [
 
@@ -63,9 +69,21 @@ export default function Testimonials() {
 
 
     const [testimonials, setTestimonials] =
-        useState(initialTestimonials);
+        useState([]);
 
 
+    useEffect(() => {
+        fetchTestimonials();
+    }, []);
+
+    const fetchTestimonials = async () => {
+        try {
+            const data = await getTestimonials();
+            setTestimonials(data);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const [editingId, setEditingId] =
         useState(null);
@@ -267,85 +285,52 @@ export default function Testimonials() {
 
     // Add / Update Testimonial
 
-    const handleSubmit = (e) => {
-
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const formData = new FormData();
 
-        if (!form.name) return;
+        formData.append("name", form.name);
+        formData.append("role", form.role);
+        formData.append("designation", "");
+        formData.append("message", form.message);
+        formData.append("rating", form.rating);
+        formData.append("status", form.featured ? 1 : 0);
 
+        if (form.image instanceof File) {
+            formData.append("image", form.image);
+        }
 
+        try {
 
-        if (editingId) {
+            if (editingId) {
 
+                await updateTestimonial(editingId, formData);
 
-            setTestimonials(
+            } else {
 
-                testimonials.map((item) =>
+                await createTestimonial(formData);
 
-                    item.id === editingId
+            }
 
-                        ?
-
-                        {
-                            ...item,
-                            ...form
-                        }
-
-                        :
-
-                        item
-
-                )
-
-            );
-
+            await fetchTestimonials();
 
             setEditingId(null);
+            setForm({
+                image: "",
+                name: "",
+                role: "",
+                rating: 5,
+                message: "",
+                featured: false,
+            });
 
+            setImagePreview("");
 
+        } catch (error) {
+            console.log(error);
         }
-
-        else {
-
-
-            const newTestimonial = {
-
-                id: Date.now(),
-
-                ...form
-
-            };
-
-
-            setTestimonials([
-
-                newTestimonial,
-
-                ...testimonials
-
-            ]);
-
-
-        }
-
-
-
-        setForm({
-
-            image: "",
-            name: "",
-            role: "",
-            rating: 5,
-            message: ""
-
-        });
-
-
-        setImagePreview("");
-
     };
-
 
 
 
@@ -355,37 +340,25 @@ export default function Testimonials() {
 
     const editTestimonial = (item) => {
 
-
-        setForm({
-
-            image: item.image,
-
-            name: item.name,
-
-            role: item.role,
-
-            rating: item.rating,
-
-            message: item.message
-
-        });
-
-
-        setImagePreview(item.image);
-
-
         setEditingId(item.id);
 
-
-        window.scrollTo({
-
-            top: 0,
-
-            behavior: "smooth"
-
+        setForm({
+            image: item.image,
+            name: item.name,
+            role: item.role,
+            rating: item.rating,
+            message: item.message,
+            featured: item.status == 1,
         });
 
+        setImagePreview(
+            `http://127.0.0.1:8000/storage/${item.image}`
+        );
 
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
     };
 
 
@@ -395,19 +368,17 @@ export default function Testimonials() {
 
     // Delete Testimonial
 
-    const deleteTestimonial = (id) => {
+    const handleDelete = async (id) => {
 
+        try {
 
-        setTestimonials(
+            await deleteTestimonial(id);
 
-            testimonials.filter(
+            await fetchTestimonials();
 
-                item => item.id !== id
-
-            )
-
-        );
-
+        } catch (error) {
+            console.log(error);
+        }
 
     };
 
@@ -415,13 +386,11 @@ export default function Testimonials() {
         const file = e.target.files[0];
 
         if (file) {
-            const url = URL.createObjectURL(file);
-
-            setImagePreview(url);
+            setImagePreview(URL.createObjectURL(file));
 
             setForm({
                 ...form,
-                image: url,
+                image: file,
             });
         }
     };
@@ -1098,7 +1067,7 @@ transition
                             </button>
 
                             <button
-                                onClick={() => deleteTestimonial(item.id)}
+                                onClick={() => handleDelete(item.id)}
                                 className="
                     w-10
                     h-10
@@ -1122,16 +1091,13 @@ transition
                         <div className="flex justify-center">
 
                             <img
-                                src={item.image}
+                                src={
+                                    item.image
+                                        ? `http://127.0.0.1:8000/storage/${item.image}`
+                                        : "/default-user.png"
+                                }
                                 alt={item.name}
-                                className="
-                    w-24
-                    h-24
-                    rounded-full
-                    object-cover
-                    border
-                    border-white/20
-                "
+                                className="w-24 h-24 rounded-full object-cover border border-white/20"
                             />
 
                         </div>

@@ -23,7 +23,7 @@ export default function Navbar() {
 
     const [open, setOpen] = useState(false);
 
-
+    
     return (
 
         <motion.nav
@@ -43,49 +43,23 @@ export default function Navbar() {
                 ease: "easeOut"
             }}
 
-            className="
-        sticky
-        top-0
-        z-40
-        w-full
-        "
+            className="sticky top-0 z-40 w-full"
 
         >
 
 
-            <div className="
-        mx-auto
-        max-w-7xl
-        px-6
-        pt-4
-        ">
+            <div className="mx-auto max-w-7xl px-6 pt-4">
 
 
                 <div
 
-                    className="
-        rounded-2xl
-        border
-        border-white/10
-        bg-gradient-to-r
-        from-[#081C15]
-        via-[#0B2B1F]
-        to-[#102E22]
-        backdrop-blur-xl
-        shadow-[0_10px_40px_rgba(0,0,0,0.35)]
-        "
+                    className="rounded-2xl  border border-white/10  bg-gradient-to-r  from-[#081C15]  via-[#0B2B1F]  to-[#102E22]  backdrop-blur-xl  shadow-[0_10px_40px_rgba(0,0,0,0.35)]"
 
                 >
 
 
 
-                    <div className="
-        flex
-        h-20
-        items-center
-        justify-between
-        px-6
-        ">
+                    <div className="flex  h-20  items-center  justify-between  px-6">
 
 
 
@@ -130,12 +104,7 @@ export default function Navbar() {
 
 
                         {/* Desktop Links */}
-                        <ul className="
-  hidden
-  lg:flex
-  items-center
-  gap-3
-">
+                        <ul className="hidden  lg:flex  items-center  gap-3">
 
                             {navLinks.map((link, index) => (
 
@@ -158,32 +127,13 @@ export default function Navbar() {
                                         y: -4,
                                     }}
 
-                                    className="
-        group
-        relative
-      "
+                                    className="group relative"
                                 >
 
                                     <Link
                                         href={link.href}
 
-                                        className="
-          relative
-          flex
-          items-center
-          rounded-full
-          px-4
-          py-2
-          text-sm
-          font-medium
-          tracking-wide
-          text-gray-300
-          transition-all
-          duration-300
-          hover:bg-white/10
-          hover:text-white
-          hover:backdrop-blur-md
-        "
+                                        className="relative flex  items-center  rounded-full  px-4  py-2  text-sm  font-medium  tracking-wide  text-gray-300  transition-all  duration-300  hover:bg-white/1  hover:text-whit  hover:backdrop-blur-m "
                                     >
 
                                         {link.name}
@@ -191,20 +141,7 @@ export default function Navbar() {
 
                                         {/* Glow Effect */}
                                         <span
-                                            className="
-            absolute
-            inset-0
-            -z-10
-            rounded-full
-            bg-[#74C69D]/20
-            opacity-0
-            blur-xl
-            transition
-            duration-500
-            group-hover:opacity-100
-          "
-                                        />
-
+                                            className="absolute  inset-0  -z-10  rounded-full  bg-[#74C69D]/20  opacity-0  blur-xl  transition  duration-500  group-hover:opacity-100" />
 
                                     </Link>
 
@@ -220,19 +157,7 @@ export default function Navbar() {
                                             width: "100%"
                                         }}
 
-                                        className="
-          absolute
-          -bottom-1
-          left-1/2
-          h-[2px]
-          -translate-x-1/2
-          rounded-full
-          bg-gradient-to-r
-          from-[#74C69D]
-          to-[#078A7A]
-        "
-
-                                    />
+                                        className="absolute  -bottom-1  left-1/2  h-[2px]  -translate-x-1/2  rounded-full  bg-gradient-to-r  from-[#74C69D]  to-[#078A7A]" />
 
                                 </motion.li>
 
@@ -249,12 +174,7 @@ export default function Navbar() {
 
                             onClick={() => setOpen(!open)}
 
-                            className="
-        lg:hidden
-        text-white
-        "
-
-                        >
+                            className="lg:hidden  text-white">
 
                             {
                                 open
@@ -289,23 +209,11 @@ export default function Navbar() {
                             opacity: 1
                         }}
 
-                        className={`
-        ${open ? "block" : "hidden"}
-        lg:hidden
-        border-t
-        border-white/10
-        px-6
-        py-5
-        `}
-
+                        className={`${open ? "block" : "hidden"} lg:hidden border-t border-white/10 px-6 py-5`}
 
                     >
 
-                        <div className="
-        flex
-        flex-col
-        gap-5
-        ">
+                        <div className="flex flex-col gap-5">
 
 
                             {
@@ -319,11 +227,7 @@ export default function Navbar() {
 
                                         onClick={() => setOpen(false)}
 
-                                        className="
-            text-gray-300
-            hover:text-[#078A7A]
-            transition
-            "
+                                        className="text-gray-300  hover:text-[#078A7A] transition"
 
                                     >
 

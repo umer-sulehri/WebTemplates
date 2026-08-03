@@ -4,6 +4,8 @@ import Navbar from "@/Components/Navbar";
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { getServices } from "@/lib/api/services";
 
 import {
     Sparkles,
@@ -19,76 +21,17 @@ import {
     Search,
     ArrowUpRight,
 } from "lucide-react";
-const highlights = [
+const serviceIcons = {
+    Globe,
+    Smartphone,
+    Code2,
+    Database,
+    LayoutDashboard,
+    Cloud,
+    MonitorSmartphone,
+    Search,
+};
 
-    "Custom Web Development",
-
-    "Mobile App Development",
-
-    "UI / UX Design",
-
-    "Cloud & API Solutions",
-
-];
-const services = [
-
-    {
-        title: "Web Development",
-        description: "Modern, responsive and high-performance websites tailored for your business.",
-        image: "/service-1.jpg",
-        icon: Globe,
-    },
-
-    {
-        title: "Mobile App Development",
-        description: "Beautiful Android & iOS applications with exceptional user experience.",
-        image: "/service-2.jpg",
-        icon: Smartphone,
-    },
-
-    {
-        title: "React & Next.js",
-        description: "Lightning-fast frontend applications using the latest React ecosystem.",
-        image: "/service-3.jpg",
-        icon: Code2,
-    },
-
-    {
-        title: "Backend Development",
-        description: "Powerful APIs and scalable backend systems with Node.js & Laravel.",
-        image: "/service-4.jpg",
-        icon: Database,
-    },
-
-    {
-        title: "WordPress",
-        description: "Professional CMS websites with custom themes and functionality.",
-        image: "/service-5.jpg",
-        icon: LayoutDashboard,
-    },
-
-    {
-        title: "Cloud Solutions",
-        description: "Cloud deployment, DevOps and secure infrastructure management.",
-        image: "/service-6.jpg",
-        icon: Cloud,
-    },
-
-    {
-        title: "UI / UX Design",
-        description: "Creative interfaces focused on usability and modern user experiences.",
-        image: "/services-7.jpg",
-        icon: MonitorSmartphone,
-    },
-
-    {
-        title: "SEO Optimization",
-        description: "Increase visibility, traffic and business growth through smart SEO.",
-        image: "/service-8.jpg",
-        icon: Search,
-    },
-
-];
 const technologies = [
 
     {
@@ -148,7 +91,19 @@ const technologies = [
 
 ];
 export default function ServicesPage() {
+    const [services, setServices] = useState([]);
+    useEffect(() => {
+        fetchServices();
+    }, []);
 
+    const fetchServices = async () => {
+        try {
+            const data = await getServices();
+            setServices(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
     return (
 
         <>
@@ -266,7 +221,7 @@ export default function ServicesPage() {
 
                                 services.map((service, index) => {
 
-                                    const Icon = service.icon;
+                                    const Icon = serviceIcons[service.icon] || Globe;
 
                                     return (
 
@@ -310,7 +265,6 @@ export default function ServicesPage() {
                                             >
 
                                                 <Image
-
                                                     src={service.image}
 
                                                     alt={service.title}

@@ -1,204 +1,47 @@
 "use client";
+import { useEffect, useState } from "react";
+import { getPortfolios } from "@/lib/api/portfolio";
 import Navbar from "@/Components/Navbar";
 import FAQ from "@/Components/FAQ";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import { useState } from "react";
-const projects = [
-
-    {
-        title: "Libranova Digital Library",
-        category: "Website",
-        image: "library.jpg",
-        description:
-            "A modern digital library platform where users can explore books, manage collections and enjoy a smooth reading experience.",
-        technologies: [
-            "Next.js",
-            "Laravel",
-            "MySQL",
-            "Tailwind CSS"
-        ],
-        url: "https://openlibrary.org",
-    },
-
-
-    {
-        title: "Devonsite Business Website",
-        category: "Website",
-        image: "devonsite.jpg",
-        description:
-            "A premium business website with modern UI, smooth animations and responsive layouts for better user experience.",
-        technologies: [
-            "Next.js",
-            "Framer Motion",
-            "Tailwind CSS"
-        ],
-        url: "https://devonsite.com",
-    },
-
-
-    {
-        title: "E-Commerce Shopping Platform",
-        category: "E-Commerce",
-        image: "/ecomerce.jpg",
-        description:
-            "A complete online shopping platform with product management, categories, cart system and payment integration.",
-        technologies: [
-            "React",
-            "Node.js",
-            "MongoDB",
-            "Stripe"
-        ],
-        url: "https://www.shopify.com",
-    },
-
-
-    {
-        title: "Food Delivery Application",
-        category: "App",
-        image: "/food.jpg",
-        description:
-            "A mobile food delivery application allowing users to browse restaurants, order food and track deliveries.",
-        technologies: [
-            "React Native",
-            "Node.js",
-            "Firebase"
-        ],
-        url: "https://www.ubereats.com",
-    },
-
-
-    {
-        title: "Admin Analytics Dashboard",
-        category: "Dashboard",
-        image: "/admin.jpg",
-        description:
-            "A powerful dashboard with charts, statistics and data visualization for managing business operations.",
-        technologies: [
-            "React",
-            "Chart.js",
-            "Tailwind CSS"
-        ],
-        url: "https://vercel.com/dashboard",
-    },
-
-
-    {
-        title: "Real Estate Website",
-        category: "Website",
-        image: "/realstate.jpg",
-        description:
-            "A modern real estate platform where users can explore properties with advanced search features.",
-        technologies: [
-            "Next.js",
-            "Prisma",
-            "PostgreSQL"
-        ],
-        url: "https://www.zillow.com",
-    },
-
-
-    {
-        title: "Fitness Tracking App",
-        category: "App",
-        image: "/fitness.jpg",
-        description:
-            "A fitness application that helps users track workouts, progress and health goals.",
-        technologies: [
-            "React Native",
-            "API",
-            "Firebase"
-        ],
-        url: "https://www.myfitnesspal.com",
-    },
-
-
-    {
-        title: "School Management System",
-        category: "Dashboard",
-        image: "/schoolmanage.jpg",
-        description:
-            "A complete school management system for handling students, teachers, attendance and reports.",
-        technologies: [
-            "Laravel",
-            "MySQL",
-            "Bootstrap"
-        ],
-        url: "https://moodle.org",
-    },
-
-
-    {
-        title: "Travel Booking Website",
-        category: "Website",
-        image: "/travel.jpg",
-        description:
-            "A travel booking platform with beautiful destinations, packages and reservation features.",
-        technologies: [
-            "Next.js",
-            "Tailwind CSS",
-            "API"
-        ],
-        url: "https://www.booking.com",
-    },
-
-
-    {
-        title: "Restaurant Management System",
-        category: "Dashboard",
-        image: "/restaurant.jpg",
-        description:
-            "A restaurant management dashboard for orders, inventory and customer management.",
-        technologies: [
-            "React",
-            "Node.js",
-            "MongoDB"
-        ],
-        url: "https://www.toasttab.com",
-    },
-
-
-    {
-        title: "Portfolio Website",
-        category: "Landing Page",
-        image: "/portfolio.jpg",
-        description:
-            "A creative portfolio website with animations, modern design and responsive layout.",
-        technologies: [
-            "Next.js",
-            "Framer Motion",
-            "Tailwind CSS"
-        ],
-        url: "https://www.awwwards.com",
-    },
-
-
-    {
-        title: "SaaS Landing Page",
-        category: "Landing Page",
-        image: "/saas.jpg",
-        description:
-            "A conversion-focused SaaS landing page with modern sections and engaging animations.",
-        technologies: [
-            "React",
-            "Tailwind CSS",
-            "Framer Motion"
-        ],
-        url: "https://linear.app",
-    },
-
-];
 const categories = [
     "All",
     "Website",
     "App",
     "Dashboard",
-    "E-Commerce"
+    "E-Commerce",
+    "Landing Page"
 ];
 
-
 export default function Portfoliopage() {
+    const [projects, setProjects] = useState([]);
+
+
+    useEffect(() => {
+
+        fetchProjects();
+
+    }, []);
+
+
+    const fetchProjects = async () => {
+
+        try {
+
+            const data = await getPortfolios();
+
+            setProjects(data);
+
+        }
+        catch (error) {
+
+            console.log(error);
+
+        }
+
+    };
     const [filter, setFilter] = useState("All");
     const filteredProjects =
         filter === "All"
@@ -523,7 +366,13 @@ export default function Portfoliopage() {
                                         >
 
                                             {
-                                                project.technologies.map((tech) => (
+                                                (
+                                                    Array.isArray(project.technologies)
+                                                        ? project.technologies
+                                                        : typeof project.technologies === "string"
+                                                            ? project.technologies.split(",")
+                                                            : []
+                                                ).map((tech) => (
                                                     <span
 
                                                         key={tech}
@@ -562,7 +411,7 @@ export default function Portfoliopage() {
                                         >
 
                                             <a
-                                                href={project.url}
+                                                href={project.project_url}
                                                 target="_blank"
                                                 className="
                                             flex
@@ -588,7 +437,7 @@ export default function Portfoliopage() {
 
 
                                             <a
-                                                href={project.FaGithub}
+                                                href={project.github_url}
                                                 target="_blank"
                                                 className="
                                             flex

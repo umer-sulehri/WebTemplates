@@ -30,7 +30,7 @@ export default function Hero() {
         to-[#0B1F16]
             pt-32
             pb-20
-            mt-10
+            
             "
         >
 

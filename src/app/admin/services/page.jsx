@@ -1,84 +1,73 @@
 "use client";
-
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
     Plus,
     Edit,
     Trash2,
-    Image as ImageIcon,
     Layers,
-    X
+    X,
+    Globe,
+    Smartphone,
+    Code2,
+    Database,
+    LayoutDashboard,
+    Cloud,
+    MonitorSmartphone,
+    Search,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import {
+    getServices,
+    createService,
+    deleteService,
+    updateService,
+} from "@/lib/api/services";
 
-const initialServices = [
-
-    {
-        id: 1,
-        background:
-            "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
-
-        logo:
-            "https://cdn-icons-png.flaticon.com/512/1005/1005141.png",
-
-        title:
-            "Web Development",
-
-        description:
-            "We build modern responsive websites using latest technologies.",
-
-        learnMore:
-            "Complete web development solutions including frontend, backend and deployment."
-    },
-
-
-    {
-        id: 2,
-
-        background:
-            "https://images.unsplash.com/photo-1558655146-d09347e92766",
-
-        logo:
-            "https://cdn-icons-png.flaticon.com/512/1828/1828884.png",
-
-        title:
-            "UI/UX Design",
-
-        description:
-            "Creative and user friendly designs for modern applications.",
-
-        learnMore:
-            "We create beautiful interfaces with focus on user experience."
-    }
-
-];
-
-
+const serviceIcons = {
+    "Globe": Globe,
+    "Smartphone": Smartphone,
+    "Code2": Code2,
+    "Database": Database,
+    "LayoutDashboard": LayoutDashboard,
+    "Cloud": Cloud,
+    "MonitorSmartphone": MonitorSmartphone,
+    "Search": Search,
+};
 
 export default function Services() {
+
     const [selectedService, setSelectedService] = useState(null);
 
     const [services, setServices] =
-        useState(initialServices);
+        useState([]);
 
 
+    useEffect(() => {
+        fetchServices();
+    }, []);
+
+    const fetchServices = async () => {
+        try {
+            const data = await getServices();
+            setServices(data);
+        } catch (error) {
+            console.error("Error fetching services:", error);
+        }
+    };
 
     const [editingId, setEditingId] =
         useState(null);
 
 
-
-    const [form, setForm] =
-        useState({
-
-            background: "",
-            logo: "",
-            title: "",
-            description: "",
-            learnMore: ""
-
-        });
+    const [form, setForm] = useState({
+        image: "",
+        icon: "",
+        title: "",
+        description: "",
+        learnmore: "",
+        status: "Active",
+    });
 
 
 
@@ -87,16 +76,11 @@ export default function Services() {
 
 
 
-    const [logoPreview, setLogoPreview] =
-        useState("");
-
-
-
 
 
     // Background Upload
 
-    const handleBackground = (e) => {
+    const handleImage = (e) => {
 
 
         const file = e.target.files[0];
@@ -104,18 +88,15 @@ export default function Services() {
 
         if (file) {
 
-            const url =
-                URL.createObjectURL(file);
+            setBackgroundPreview(URL.createObjectURL(file));
 
-
-            setBackgroundPreview(url);
 
 
             setForm({
 
                 ...form,
 
-                background: url
+                image: file
 
             });
 
@@ -124,51 +105,11 @@ export default function Services() {
 
 
     };
-
-
-
-
-
-    // Logo Upload
-
-    const handleLogo = (e) => {
-
-
-        const file = e.target.files[0];
-
-
-        if (file) {
-
-
-            const url =
-                URL.createObjectURL(file);
-
-
-            setLogoPreview(url);
-
-
-            setForm({
-
-                ...form,
-
-                logo: url
-
-            });
-
-
-        }
-
-
-    };
-
-
-
-
 
     // Add / Update Service
 
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
 
 
         e.preventDefault();
@@ -176,83 +117,58 @@ export default function Services() {
 
         if (!form.title) return;
 
-
-
         if (editingId) {
 
+            const formData = new FormData();
 
-            setServices(
+            formData.append("title", form.title);
+            formData.append("description", form.description);
+            formData.append("learnmore", form.learnmore);
+            formData.append("icon", form.icon);
 
-                services.map((item) =>
+            if (form.image instanceof File) {
+                formData.append("image", form.image);
+            }
 
-                    item.id === editingId
+            await updateService(editingId, formData);
 
-                        ?
-
-                        {
-
-                            ...item,
-
-                            ...form
-
-                        }
-
-                        :
-
-                        item
-
-                )
-
-            );
-
-
+            await fetchServices();
 
             setEditingId(null);
 
+        } else {
 
+            const formData = new FormData();
 
-        }
+            formData.append("title", form.title);
+            formData.append("description", form.description);
+            formData.append("learnmore", form.learnmore);
+            formData.append("icon", form.icon);
 
-        else {
+            if (form.image) {
+                formData.append("image", form.image);
+            }
 
+            await createService(formData);
 
-            const newService = {
-
-                id: Date.now(),
-
-                ...form
-
-            };
-
-
-
-            setServices([
-
-                newService,
-
-                ...services
-
-            ]);
-
-
+            await fetchServices();
         }
 
 
 
         setForm({
-
-            background: "",
-            logo: "",
+            image: "",
+            icon: "",
             title: "",
             description: "",
-            learnMore: ""
+            learnmore: "",
+            status: "Active",
 
         });
 
 
         setBackgroundPreview("");
 
-        setLogoPreview("");
 
     };
 
@@ -268,22 +184,20 @@ export default function Services() {
 
         setForm({
 
-            background: service.background,
+            image: service.image,
 
-            logo: service.logo,
+            icon: service.icon,
 
             title: service.title,
 
             description: service.description,
 
-            learnMore: service.learnMore
+            learnmore: service.learnmore
 
         });
 
 
-        setBackgroundPreview(service.background);
-
-        setLogoPreview(service.logo);
+        setBackgroundPreview(service.image);
 
 
         setEditingId(service.id);
@@ -298,24 +212,36 @@ export default function Services() {
     // Delete
 
 
-    const deleteService = (id) => {
+    const handleDelete = async (id) => {
+        try {
+            await deleteService(id);
 
+            setServices(
+                services.filter((service) => service.id !== id)
+            );
 
-        setServices(
-
-            services.filter(
-
-                (item) => item.id !== id
-
-            )
-
-        );
-
-
+        } catch (error) {
+            console.log(error);
+        }
     };
 
+    const updateService = async (id, data) => {
+        try {
+            const response = await apiClient.post(
+                `/services/${id}?_method=PUT`,
+                data,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
 
-
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    };
 
 
     return (
@@ -547,7 +473,7 @@ mb-3
 
                             type="file"
 
-                            onChange={handleBackground}
+                            onChange={handleImage}
 
                             className="
 text-gray-300
@@ -581,64 +507,89 @@ border-white/20
                     </div>
 
 
-
-
-
-                    {/* Logo Upload */}
-
-
-                    <div>
-
-
-                        <label className="
-text-gray-300
-block
-mb-3
-">
-
-                            Service Logo
-
+                    <div className="relative">
+                        <label className="mb-2 block text-sm font-medium text-gray-300">
+                            Select Icon
                         </label>
 
-
-                        <input
-
-                            type="file"
-
-                            onChange={handleLogo}
-
+                        <select
+                            value={form.icon}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    icon: e.target.value,
+                                })
+                            }
                             className="
-text-gray-300
-"
+            w-full
+            appearance-none
+            rounded-xl
+            border
+            border-white/10
+            bg-white/5
+            px-4
+            py-3
+            text-white
+            outline-none
+            backdrop-blur-xl
+            transition-all
+            duration-300
+            focus:border-[#52D681]/50
+            focus:ring-2
+            focus:ring-[#52D681]/20
+        "
+                        >
+                            <option
+                                value=""
+                                className="bg-[#081C15]"
+                            >
+                                Select Icon
+                            </option>
 
-                        />
+                            <option value="Globe" className="bg-[#081C15]">
+                                🌐 Globe
+                            </option>
 
+                            <option value="Smartphone" className="bg-[#081C15]">
+                                📱 Smartphone
+                            </option>
 
+                            <option value="Code2" className="bg-[#081C15]">
+                                💻 Code
+                            </option>
 
-                        {
-                            logoPreview &&
+                            <option value="Database" className="bg-[#081C15]">
+                                🗄 Database
+                            </option>
 
-                            <img
+                            <option value="LayoutDashboard" className="bg-[#081C15]">
+                                📊 Dashboard
+                            </option>
 
-                                src={logoPreview}
+                            <option value="Cloud" className="bg-[#081C15]">
+                                ☁ Cloud
+                            </option>
 
-                                className="
-mt-4
-h-24
-w-24
-object-contain
-rounded-xl
-bg-black/20
-p-3
-border
-border-white/20
-"
+                            <option value="MonitorSmartphone" className="bg-[#081C15]">
+                                🖥 UI / UX
+                            </option>
 
-                            />
+                            <option value="Search" className="bg-[#081C15]">
+                                🔍 SEO
+                            </option>
 
-                        }
+                        </select>
 
-
+                        {/* Dropdown Arrow */}
+                        <div className="
+        pointer-events-none
+        absolute
+        right-4
+        top-[42px]
+        text-gray-400
+    ">
+                            ▼
+                        </div>
                     </div>
 
 
@@ -740,7 +691,7 @@ focus:border-purple-500
 
                         placeholder="Learn More Details"
 
-                        value={form.learnMore}
+                        value={form.learnmore}
 
                         onChange={(e) =>
 
@@ -748,7 +699,7 @@ focus:border-purple-500
 
                                 ...form,
 
-                                learnMore: e.target.value
+                                learnmore: e.target.value
 
                             })
 
@@ -827,17 +778,16 @@ transition
 
                                 setForm({
 
-                                    background: "",
-                                    logo: "",
+                                    image: "",
+                                    icon: "",
                                     title: "",
                                     description: "",
-                                    learnMore: ""
+                                    learnmore: ""
 
                                 });
 
                                 setBackgroundPreview("");
 
-                                setLogoPreview("");
 
                             }}
 
@@ -882,9 +832,11 @@ gap-6
 ">
 
 
-                {
-                    services.map((service) => (
 
+                {services.map((service) => {
+                    const Icon = serviceIcons[service.icon];
+
+                    return (
 
                         <motion.div
 
@@ -922,7 +874,7 @@ group
 
                             <img
 
-                                src={service.background}
+                                src={service.image}
 
                                 alt={service.title}
 
@@ -976,42 +928,14 @@ p-6
                                 {/* Logo */}
 
 
-                                <div className="
-w-20
-h-20
-rounded-2xl
-bg-white/10
-backdrop-blur-xl
-border
-border-white/20
-flex
-items-center
-justify-center
-mb-5
-">
-
-
-                                    <img
-
-                                        src={service.logo}
-
-                                        alt="logo"
-
-                                        className="
-w-12
-h-12
-object-contain
-"
-
-                                    />
-
-
+                                <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
+                                    {Icon && (
+                                        <Icon
+                                            size={40}
+                                            className="text-white"
+                                        />
+                                    )}
                                 </div>
-
-
-
-
-
 
 
                                 <h3 className="
@@ -1108,7 +1032,7 @@ transition
 
                                     <button
 
-                                        onClick={() => deleteService(service.id)}
+                                        onClick={() => handleDelete(service.id)}
 
                                         className="
 w-10
@@ -1144,9 +1068,9 @@ transition
                         </motion.div>
 
 
-                    ))
 
-                }
+                    );
+                })}
 
                 {
                     selectedService && (
@@ -1230,7 +1154,7 @@ justify-center
 
                                 <img
 
-                                    src={selectedService.background}
+                                    src={selectedService.image}
 
                                     className="
 w-full
@@ -1246,23 +1170,18 @@ object-cover
 p-8
 text-center
 ">
+                                    const SelectedIcon = serviceIcons[selectedService.icon];
 
+                                    <div className="w-20 h-20 mx-auto rounded-2xl bg-white/10 flex items-center justify-center">
 
-                                    <img
+                                        {serviceIcons[selectedService.icon] &&
+                                            (() => {
+                                                const SelectedIcon = serviceIcons[selectedService.icon];
+                                                return <SelectedIcon size={45} className="text-white" />;
+                                            })()
+                                        }
 
-                                        src={selectedService.logo}
-
-                                        className="
-w-20
-h-20
-mx-auto
-rounded-2xl
-bg-white/10
-p-3
-object-contain
-"
-
-                                    />
+                                    </div>
 
 
 
@@ -1285,7 +1204,7 @@ mt-5
 leading-7
 ">
 
-                                        {selectedService.learnMore}
+                                        {selectedService.learnmore}
 
                                     </p>
 
