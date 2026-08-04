@@ -1,6 +1,5 @@
 "use client";
 import apiClient from "@/lib/api/apiClient";
-import { login } from "@/lib/api/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -13,6 +12,9 @@ export default function LoginPage() {
     const router = useRouter();
     const handleLogin = async (e) => {
         e.preventDefault();
+        e.stopPropagation();
+
+        alert("handleLogin called");
 
         try {
 
@@ -21,50 +23,23 @@ export default function LoginPage() {
                 password,
             });
 
-            console.log("Response:", response.data);
+            console.log("FULL:", response.data);
+            console.log("TOKEN:", response.data.token);
 
+            localStorage.setItem("token", response.data.token);
 
-            localStorage.setItem(
-                "token",
-                response.data.token
-            );
-
-            localStorage.setItem(
-                "user",
-                JSON.stringify(response.data.user)
-            );
-
-
-            console.log(
-                "Token saved:",
-                localStorage.getItem("token")
-            );
-
+            console.log("AFTER SAVE:", localStorage.getItem("token"));
 
             router.push("/admin/dashboard");
 
-
         } catch (error) {
-
-            console.log(
-                "Login Error:",
-                error.response?.data
-            );
-
+            console.log("STATUS:", error.response?.status);
+            console.log("DATA:", error.response?.data);
         }
     };
     return (
 
-        <div
-            className="
-            min-h-screen
-            flex
-            items-center
-            justify-center
-            bg-[#061A16]
-            px-5
-            "
-        >
+        <div className="min-h-screen flex items-center justify-center bg-[#061A16] px-6">
 
             <motion.div
 
@@ -78,34 +53,17 @@ export default function LoginPage() {
                     y: 0
                 }}
 
-                className="
-                w-full
-                max-w-md
-                rounded-3xl
-                border
-                border-white/10
-                bg-white/10
-                backdrop-blur-xl
-                p-8
-                shadow-2xl
-                "
+                className="w-full max-w-md rounded-3xl border border-white/10 bg-white/10 backdrop-blur-xl p-8 shadow-2xl"
 
             >
 
                 <div className="text-center mb-8">
 
-                    <h1 className="
-                    text-3xl
-                    font-bold
-                    text-white
-                    ">
+                    <h1 className="text-3xl font-bold text-white">
                         Welcome Back
                     </h1>
 
-                    <p className="
-                    mt-2
-                    text-gray-400
-                    ">
+                    <p className="mt-2 text-gray-400">
                         Login to Admin Dashboard
                     </p>
 
@@ -116,25 +74,14 @@ export default function LoginPage() {
 
                 <div className="mb-5">
 
-                    <label className="
-                    text-sm
-                    text-gray-400
-                    ">
+                    <label className="text-sm text-gray-400">
                         Email
                     </label>
 
 
                     <div className="relative mt-2">
 
-                        <Mail
-                            size={20}
-                            className="
-                            absolute
-                            left-4
-                            top-1/2
-                            -translate-y-1/2
-                            text-gray-400
-                            "
+                        <Mail size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
                         />
 
                         <input
@@ -147,19 +94,7 @@ export default function LoginPage() {
 
                             placeholder="admin@gmail.com"
 
-                            className="
-                            w-full
-                            rounded-xl
-                            bg-black/20
-                            border
-                            border-white/10
-                            py-3
-                            pl-12
-                            pr-4
-                            text-white
-                            outline-none
-                            focus:border-emerald-500
-                            "
+                            className="w-full rounded-xl bg-black/20 border border-white/10 py-3 pl-12 pr-4 text-white outline-none focus:border-emerald-500"
 
                         />
 
@@ -172,76 +107,39 @@ export default function LoginPage() {
 
                 <div className="mb-6">
 
-                    <label className="
-                    text-sm
-                    text-gray-400
-                    ">
+                    <label className="text-sm text-gray-400">
                         Password
                     </label>
 
 
                     <div className="relative mt-2">
 
-                        <Lock
-                            size={20}
-                            className="
-                            absolute
-                            left-4
-                            top-1/2
-                            -translate-y-1/2
-                            text-gray-400
-                            "
+                        <Lock size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
                         />
 
 
                         <input
 
-                            type="password"
+                        type="password"
 
-                            value={password}
+                        value={password}
 
-                            onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => setPassword(e.target.value)}
 
-                            placeholder="********"
+                        placeholder="********"
 
-                            className="
-                            w-full
-                            rounded-xl
-                            bg-black/20
-                            border
-                            border-white/10
-                            py-3
-                            pl-12
-                            pr-4
-                            text-white
-                            outline-none
-                            focus:border-emerald-500
-                            "
+                        className="w-full rounded-xl bg-black/20 border border-white/10 py-3 pl-12 pr-4 text-white outline-none focus:border-emerald-500"
 
                         />
 
 
                     </div>
-
-
                 </div>
 
                 <button
+                    type="button"
                     onClick={handleLogin}
-                    className="
-                    w-full
-                    flex
-                    items-center
-                    justify-center
-                    gap-2
-                    rounded-xl
-                    bg-emerald-500
-                    py-3
-                    text-white
-                    font-semibold
-                    hover:scale-105
-                    transition
-                    "
+                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-white font-semibold hover:scale-105 transition"
 
                 >
 

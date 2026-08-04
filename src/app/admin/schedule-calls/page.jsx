@@ -1,6 +1,12 @@
 "use client";
+import { useState, useEffect } from "react";
 
-import { useState } from "react";
+import {
+    getScheduleCalls,
+    createScheduleCall,
+    updateScheduleCall,
+    deleteScheduleCall,
+} from "@/lib/api/sheduleCalls";
 import { motion } from "framer-motion";
 import {
     PhoneCall,
@@ -16,40 +22,6 @@ import {
     X,
 } from "lucide-react";
 
-const initialCalls = [
-    {
-        id: 1,
-        name: "Ali Khan",
-        email: "ali@gmail.com",
-        phone: "+92 300 1234567",
-        service: "Web Development",
-        date: "30 Jul 2026",
-        time: "10:30 AM",
-        status: "Pending",
-    },
-
-    {
-        id: 2,
-        name: "Ahmed Raza",
-        email: "ahmed@gmail.com",
-        phone: "+92 311 7654321",
-        service: "UI / UX Design",
-        date: "31 Jul 2026",
-        time: "03:00 PM",
-        status: "Approved",
-    },
-
-    {
-        id: 3,
-        name: "Sarah Ahmed",
-        email: "sarah@gmail.com",
-        phone: "+92 333 5558899",
-        service: "SEO",
-        date: "01 Aug 2026",
-        time: "01:30 PM",
-        status: "Rejected",
-    },
-];
 
 export default function ScheduleCalls() {
     const [showModal, setShowModal] = useState(false);
@@ -63,7 +35,26 @@ export default function ScheduleCalls() {
         date: "",
         time: "",
     });
-    const [calls, setCalls] = useState(initialCalls);
+
+    const [calls, setCalls] = useState([]);
+
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchCalls();
+    }, []);
+
+    const fetchCalls = async () => {
+        try {
+            setLoading(true);
+            const data = await getScheduleCalls();
+            setCalls(data);
+        } catch (error) {
+            console.error("Failed to fetch schedule calls:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const [search, setSearch] = useState("");
 
@@ -82,66 +73,79 @@ export default function ScheduleCalls() {
         return matchSearch && matchStatus;
     });
 
-    const updateStatus = (id, status) => {
+    const updateStatus = async (id, status) => {
+        try {
+            const call = calls.find((item) => item.id === id);
 
-        setCalls(
-            calls.map((item) =>
-                item.id === id
-                    ? { ...item, status }
-                    : item
-            )
-        );
+            if (!call) return;
+
+            await updateScheduleCall(id, {
+                ...call,
+                status,
+            });
+
+            await fetchCalls();
+        } catch (error) {
+            console.error("Status update failed:", error);
+        }
     };
 
-    const deleteCall = (id) => {
-
-        setCalls(
-            calls.filter((item) => item.id !== id)
-        );
+    const deleteCall = async (id) => {
+        try {
+            await deleteScheduleCall(id);
+            await fetchCalls();
+        } catch (error) {
+            console.error("Delete failed:", error);
+        }
     };
-    const addCall = () => {
 
-        const call = {
+    const addCall = async () => {
+        console.log("SENDING DATA:", newCall);
+        try {
 
-            id: Date.now(),
+            await createScheduleCall({
+                ...newCall,
+                status: "pending",
+            });
 
-            ...newCall,
+            await fetchCalls();
 
-            status: "Pending"
+            setNewCall({
+                name: "",
+                email: "",
+                phone: "",
+                service: "",
+                date: "",
+                time: "",
+            });
 
-        };
+            setShowModal(false);
 
-
-        setCalls([
-            ...calls,
-            call
-        ]);
-
-
-        setNewCall({
-            name: "",
-            email: "",
-            phone: "",
-            service: "",
-            date: "",
-            time: "",
-        });
-
-
-        setShowModal(false);
-
+        } catch (error) {
+            console.log("STATUS:", error.response?.status);
+            console.log("ERROR DATA:", error.response?.data);
+        }
     };
 
     const totalCalls = calls.length;
 
     const pendingCalls =
-        calls.filter((item) => item.status === "Pending").length;
+        calls.filter((item) => item.status === "pending").length;
 
-    const approvedCalls =
-        calls.filter((item) => item.status === "Approved").length;
+    const confirmedCalls =
+        calls.filter((item) => item.status === "confirmed").length;
 
-    const rejectedCalls =
-        calls.filter((item) => item.status === "Rejected").length;
+    const cancelledCalls =
+        calls.filter((item) => item.status === "cancelled").length;
+
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-[70vh] text-white text-xl">
+                Loading Schedule Calls...
+            </div>
+        );
+    }
 
     return (
 
@@ -213,16 +217,16 @@ export default function ScheduleCalls() {
                             All Status
                         </option>
 
-                        <option value="Pending" className="bg-slate-900">
+                        <option value="pending" className="bg-slate-900">
                             Pending
                         </option>
 
-                        <option value="Approved" className="bg-slate-900">
-                            Approved
+                        <option value="confirmed" className="bg-slate-900">
+                            Confirmed
                         </option>
 
-                        <option value="Rejected" className="bg-slate-900">
-                            Rejected
+                        <option value="cancelled" className="bg-slate-900">
+                            Cancelled
                         </option>
 
                     </select>
@@ -377,7 +381,7 @@ text-green-400
                         <div>
 
                             <p className="text-gray-400">
-                                Approved
+                                Confirmed
                             </p>
 
                             <h2 className="
@@ -385,7 +389,7 @@ text-3xl
 font-bold
 text-white
 ">
-                                {approvedCalls}
+                                {confirmedCalls}
                             </h2>
 
                         </div>
@@ -423,7 +427,7 @@ text-red-400
                         <div>
 
                             <p className="text-gray-400">
-                                Rejected
+                                Cancelled
                             </p>
 
                             <h2 className="
@@ -431,7 +435,7 @@ text-3xl
 font-bold
 text-white
 ">
-                                {rejectedCalls}
+                                {cancelledCalls}
                             </h2>
 
                         </div>
@@ -639,25 +643,15 @@ py-1
 rounded-full
 text-sm
 
-${call.status === "Pending"
-                                                    ?
-                                                    "bg-yellow-500/20 text-yellow-400"
-
-                                                    :
-
-                                                    call.status === "Approved"
-                                                        ?
-
-                                                        "bg-green-500/20 text-green-400"
-
-                                                        :
-
-                                                        "bg-red-500/20 text-red-400"
-
+                                                    ${call.status === "pending"
+                                                    ? "bg-yellow-500/20 text-yellow-400"
+                                                    : call.status === "confirmed"
+                                                        ? "bg-blue-500/20 text-blue-400"
+                                                        : call.status === "completed"
+                                                            ? "bg-green-500/20 text-green-400"
+                                                            : "bg-red-500/20 text-red-400"
                                                 }
-
-`}>
-
+                                            `}>
                                                 {call.status}
 
                                             </span>
@@ -675,7 +669,7 @@ ${call.status === "Pending"
 
 
                                                 <button
-                                                    onClick={() => updateStatus(call.id, "Approved")}
+                                                    onClick={() => updateStatus(call.id, "confirmed")}
                                                     className="
 p-2
 rounded-lg
@@ -691,7 +685,7 @@ text-green-400
 
 
                                                 <button
-                                                    onClick={() => updateStatus(call.id, "Rejected")}
+                                                    onClick={() => updateStatus(call.id, "cancelled")}
                                                     className="
 p-2
 rounded-lg
@@ -832,24 +826,27 @@ gap-4
 
                                         <input
                                             key={field}
+                                            type={
+                                                field === "date"
+                                                    ? "date"
+                                                    : field === "time"
+                                                        ? "time"
+                                                        : field === "email"
+                                                            ? "email"
+                                                            : field === "phone"
+                                                                ? "tel"
+                                                                : "text"
+                                            }
                                             placeholder={field.toUpperCase()}
                                             value={newCall[field]}
-
-                                            onChange={(e) => setNewCall({
-                                                ...newCall,
-                                                [field]: e.target.value
-                                            })}
-
+                                            onChange={(e) =>
+                                                setNewCall({
+                                                    ...newCall,
+                                                    [field]: e.target.value
+                                                })
+                                            }
                                             className="
-rounded-xl
-bg-black/20
-border
-border-white/10
-p-3
-text-white
-outline-none
-focus:border-emerald-500
-"
+                                                        rounded-xl bg-black/20 border border-white/10 p-3 text-white outline-none focus:border-emerald-500 "
                                         />
 
                                     ))

@@ -1,6 +1,12 @@
 "use client";
+import { useEffect, useState } from "react";
 
-import { useState } from "react";
+import {
+    getBlogs,
+    createBlog,
+    updateBlog,
+    deleteBlog as removeBlog,
+} from "@/lib/api/blogs";
 import { motion } from "framer-motion";
 import {
     Plus,
@@ -27,43 +33,23 @@ const categories = [
     "SEO",
 ];
 
-const initialBlogs = [
-    {
-        id: 1,
-        image:
-            "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
-        category: "Next.js",
-        title: "Why Next.js Is Perfect For Modern Websites",
-        description:
-            "Learn why Next.js has become the first choice for building modern, scalable and SEO friendly websites.",
-        content: "Full blog content...",
-        author: "Admin",
-        readTime: "5 min",
-        date: "30 Jul 2026",
-        featured: true,
-        status: "Published",
-    },
-
-    {
-        id: 2,
-        image:
-            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3",
-        category: "React",
-        title: "React Best Practices Every Developer Should Know",
-        description:
-            "Simple and effective React techniques to write cleaner and faster applications.",
-        content: "Full blog content...",
-        author: "Admin",
-        readTime: "7 min",
-        date: "28 Jul 2026",
-        featured: false,
-        status: "Published",
-    },
-];
 
 export default function Blogs() {
 
-    const [blogs, setBlogs] = useState(initialBlogs);
+    const [blogs, setBlogs] = useState([]);
+
+    useEffect(() => {
+        fetchBlogs();
+    }, []);
+
+    const fetchBlogs = async () => {
+        try {
+            const data = await getBlogs();
+            setBlogs(data);
+        } catch (err) {
+            console.log(err);
+        }
+    };
 
     const [editingId, setEditingId] = useState(null);
 
@@ -100,57 +86,65 @@ export default function Blogs() {
 
         setForm({
             ...form,
-            image: url,
+            image: file,
         });
     };
 
     // Save / Update Blog
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
 
         e.preventDefault();
 
-        if (!form.title) return;
+        const formData = new FormData();
 
-        if (editingId) {
+        formData.append("title", form.title);
+        formData.append("category", form.category);
+        formData.append("author", form.author);
+        formData.append("description", form.description);
+        formData.append("content", form.content);
+        formData.append("featured", form.featured ? 1 : 0);
+        formData.append("status", form.status === "Published" ? 1 : 0);
 
-            setBlogs(
-                blogs.map((item) =>
-                    item.id === editingId
-                        ? {
-                            ...item,
-                            ...form,
-                        }
-                        : item
-                )
-            );
+        if (form.image instanceof File) {
+            formData.append("image", form.image);
+        }
+
+        try {
+
+            if (editingId) {
+
+                await updateBlog(editingId, formData);
+
+            } else {
+
+                await createBlog(formData);
+
+            }
+
+            fetchBlogs();
 
             setEditingId(null);
 
-        } else {
+            setImagePreview("");
 
-            setBlogs([
-                {
-                    id: Date.now(),
-                    ...form,
-                    date: new Date().toLocaleDateString(),
-                },
-                ...blogs,
-            ]);
+            setForm({
+                image: "",
+                category: "Web Development",
+                title: "",
+                description: "",
+                content: "",
+                author: "Admin",
+                readTime: "5 min",
+                featured: false,
+                status: "Published",
+            });
+
+        } catch (err) {
+
+            console.log(err);
+
         }
 
-        setForm({
-            image: "",
-            category: "Web Development",
-            title: "",
-            description: "",
-            content: "",
-            author: "Admin",
-            readTime: "5 min",
-            featured: false,
-            status: "Published",
-        });
-
-        setImagePreview("");
     };
 
     // Edit
@@ -158,22 +152,40 @@ export default function Blogs() {
 
         setEditingId(blog.id);
 
-        setForm(blog);
+        setForm({
+            image: "",
+            category: blog.category,
+            title: blog.title,
+            description: blog.description,
+            content: blog.content,
+            author: blog.author,
+            readTime: blog.readTime || "5 min",
+            featured: blog.featured,
+            status: blog.status == 1 ? "Published" : "Draft",
+        });
 
-        setImagePreview(blog.image);
+        setImagePreview(
+            blog.image
+                ? `http://127.0.0.1:8000/storage/${blog.image}`
+                : ""
+        );
 
         window.scrollTo({
             top: 0,
             behavior: "smooth",
         });
+
     };
 
     // Delete
-    const deleteBlog = (id) => {
+    const deleteBlog = async (id) => {
 
-        setBlogs(
-            blogs.filter((item) => item.id !== id)
-        );
+        if (!confirm("Delete this blog?")) return;
+
+        await removeBlog(id);
+
+        fetchBlogs();
+
     };
 
     // Search + Filter
@@ -193,7 +205,8 @@ export default function Blogs() {
 
         const matchStatus =
             statusFilter === "All" ||
-            item.status === statusFilter;
+            (statusFilter === "Published" && item.status == 1) ||
+            (statusFilter === "Draft" && item.status == 0);
 
         return (
             matchSearch &&
@@ -206,9 +219,7 @@ export default function Blogs() {
     const totalBlogs = blogs.length;
 
     const publishedBlogs =
-        blogs.filter(
-            (item) => item.status === "Published"
-        ).length;
+        blogs.filter(item => item.status == 1).length;
 
     const featuredBlogs =
         blogs.filter(
@@ -1023,7 +1034,11 @@ backdrop-blur-xl
 
                                 <img
 
-                                    src={item.image}
+                                    src={
+                                        item.image
+                                            ? `http://127.0.0.1:8000/storage/${item.image}`
+                                            : "/placeholder.jpg"
+                                    }
 
                                     alt={item.title}
 
@@ -1200,7 +1215,7 @@ text-white
                                         >
                                             <Trash2 size={18} />
                                         </button>
-                                        
+
                                     </div>
                                 </div>
                             </div>

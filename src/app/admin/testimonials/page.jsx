@@ -147,7 +147,7 @@ export default function Testimonials() {
 
     const featuredCount =
         testimonials.filter(
-            (item) => item.featured
+            (item) => item.status == 1
         ).length;
 
 
@@ -940,7 +940,8 @@ transition
                                     name: "",
                                     role: "",
                                     rating: 5,
-                                    message: ""
+                                    message: "",
+                                    featured: false,
 
                                 });
 
@@ -979,11 +980,6 @@ transition
 
             </motion.div>
 
-
-
-            {/* Testimonials Cards */}
-
-
             {/* Testimonials Cards */}
 
             <div
@@ -1016,7 +1012,7 @@ transition
 
                         {/* Featured Badge */}
 
-                        {item.featured && (
+                        {item.status == 1 && (
                             <div
                                 className="
                     absolute
@@ -1093,7 +1089,7 @@ transition
                             <img
                                 src={
                                     item.image
-                                        ? `http://127.0.0.1:8000/storage/${item.image}`
+                                        ? `/${item.image}`
                                         : "/default-user.png"
                                 }
                                 alt={item.name}

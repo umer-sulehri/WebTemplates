@@ -1,5 +1,5 @@
 "use client";
-
+import { createScheduleCall } from "@/lib/api/sheduleCalls";
 import { motion } from "framer-motion";
 import {
     Calendar,
@@ -8,24 +8,54 @@ import {
     ArrowRight,
     CheckCircle2,
 } from "lucide-react";
+
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
+
 import Link from 'next/link';
+
 export default function ScheduleCallPage() {
     const router = useRouter();
+
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const [form, setForm] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        service: "",
+        date: "",
+        time: "",
+    });
 
-        setLoading(true);
-
-        setTimeout(() => {
-            setLoading(false);
-            router.push("/#home");
-        }, 2000);
+    const handleChange = (e) => {
+        setForm({
+            ...form,
+            [e.target.name]: e.target.value,
+        });
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            setLoading(true);
+
+            await createScheduleCall({
+                ...form,
+                status: "pending",
+            });
+
+            router.push("/#home");
+
+        } catch (error) {
+            console.log(error.response?.data);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
     return (
         <section className="relative min-h-screen overflow-hidden bg-[#061A16]">
 
@@ -151,9 +181,12 @@ export default function ScheduleCallPage() {
 
                                     <input
                                         type="text"
+                                        name="name"
+                                        value={form.name}
+                                        onChange={handleChange}
                                         required
                                         placeholder="John Smith"
-                                        className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white placeholder:text-slate-500 outline-none transition-all duration-300 focus:border-emerald-500"
+                                        className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white placeholder:text-slate-500 outline-none"
                                     />
                                 </div>
 
@@ -164,9 +197,12 @@ export default function ScheduleCallPage() {
 
                                     <input
                                         type="email"
+                                        name="email"
+                                        value={form.email}
+                                        onChange={handleChange}
                                         required
                                         placeholder="john@example.com"
-                                        className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white placeholder:text-slate-500 outline-none transition-all duration-300 focus:border-emerald-500"
+                                        className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white placeholder:text-slate-500 outline-none"
                                     />
                                 </div>
 
@@ -183,9 +219,12 @@ export default function ScheduleCallPage() {
 
                                     <input
                                         type="tel"
+                                        name="phone"
+                                        value={form.phone}
+                                        onChange={handleChange}
                                         required
-                                        placeholder="+44 7700 900000"
-                                        className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white placeholder:text-slate-500 outline-none transition-all duration-300 focus:border-emerald-500"
+                                        placeholder="+92 3000000000"
+                                        className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white placeholder:text-slate-500 outline-none"
                                     />
                                 </div>
 
@@ -212,7 +251,10 @@ export default function ScheduleCallPage() {
                                 </label>
 
                                 <select
-                                    className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white outline-none focus:border-emerald-500"
+                                    name="service"
+                                    value={form.service}
+                                    onChange={handleChange}
+                                    className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white"
                                 >
                                     <option className="bg-[#0B2B25]">Website Development</option>
                                     <option className="bg-[#0B2B25]">Web Application</option>
@@ -237,8 +279,11 @@ export default function ScheduleCallPage() {
 
                                     <input
                                         type="date"
+                                        name="date"
+                                        value={form.date}
+                                        onChange={handleChange}
                                         required
-                                        className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white outline-none focus:border-emerald-500"
+                                        className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white"
                                     />
 
                                 </div>
@@ -252,8 +297,11 @@ export default function ScheduleCallPage() {
 
                                     <input
                                         type="time"
+                                        name="time"
+                                        value={form.time}
+                                        onChange={handleChange}
                                         required
-                                        className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white outline-none focus:border-emerald-500"
+                                        className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 text-white"
                                     />
 
                                 </div>
@@ -322,10 +370,11 @@ export default function ScheduleCallPage() {
                                 />
 
                             </div>
-                            <Link href="/contact">
-                                <button
-                                    type="submit"
-                                    className="
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="
                                      group
                                      flex
                                      h-16
@@ -349,20 +398,19 @@ export default function ScheduleCallPage() {
                                      hover:scale-[1.02]
                                      hover:shadow-[0_15px_40px_rgba(16,185,129,0.35)]
                                             "
-                                >
-                                    Book My Consultation
+                            >
+                                Book My Consultation
 
-                                    <ArrowRight
-                                        size={20}
-                                        className="transition-transform duration-300 group-hover:translate-x-1"
-                                    />
-                                </button>
-                            </Link>
+                                <ArrowRight
+                                    size={20}
+                                    className="transition-transform duration-300 group-hover:translate-x-1"
+                                />
+                            </button>
                         </form>
                     </div>
                 </div>
             </div>
-        </section>
+        </section >
 
     );
 }

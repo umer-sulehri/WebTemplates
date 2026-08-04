@@ -3,7 +3,8 @@ import Navbar from "@/Components/Navbar";
 import { motion } from "framer-motion";
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
-
+import { useEffect, useState } from "react";
+import { getTestimonials } from "@/lib/api/testimonials";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 
@@ -11,61 +12,28 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 
-
-const testimonials = [
-    {
-        name: "Ali Khan",
-        role: "Student",
-        image: "/images/user1.jpg",
-        rating: 5,
-        review:
-            "This digital library platform made finding and reading books extremely easy. The experience is smooth and modern.",
-    },
-    {
-        name: "Sarah Ahmed",
-        role: "Researcher",
-        image: "/images/user2.jpg",
-        rating: 5,
-        review:
-            "Amazing collection of books with a clean interface. I can quickly search and access resources whenever I need.",
-    },
-    {
-        name: "Hamza Malik",
-        role: "Software Developer",
-        image: "/images/user3.jpg",
-        rating: 4,
-        review:
-            "A beautifully designed platform with excellent performance. The animations and user experience feel premium.",
-    },
-    {
-        name: "Ahmed Raza",
-        role: "Book Lover",
-        image: "/images/user4.jpg",
-        rating: 5,
-        review:
-            "The reading experience is fantastic. The platform is fast, organized and very easy to use.",
-    },
-    {
-        name: "Ayesha Noor",
-        role: "University Student",
-        image: "/images/user5.jpg",
-        rating: 5,
-        review:
-            "I love the modern design and huge collection of resources. Finding books has become much easier.",
-    },
-    {
-        name: "Usman Tariq",
-        role: "Teacher",
-        image: "/images/user6.jpg",
-        rating: 4,
-        review:
-            "A helpful platform for students and teachers. The interface is clean and provides a great digital library experience.",
-    },
-];
-
-
 export default function TestimonialsPage() {
 
+    const [testimonials, setTestimonials] = useState([]);
+
+    useEffect(() => {
+        fetchTestimonials();
+    }, []);
+
+    const fetchTestimonials = async () => {
+        try {
+            const data = await getTestimonials();
+
+            // Sirf active testimonials
+            const activeTestimonials = data.filter(
+                (item) => item.status == 1
+            );
+            console.log(data);
+            setTestimonials(activeTestimonials);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const prevRef = useRef(null);
     const nextRef = useRef(null);
@@ -83,7 +51,7 @@ export default function TestimonialsPage() {
             to-[#081C15]
             "
         >
-<Navbar />
+            <Navbar />
 
             <section className="relative py-28">
 
@@ -310,14 +278,15 @@ export default function TestimonialsPage() {
 
                                                 <div className="flex gap-1">
 
+
                                                     {
-                                                        [1, 2, 3, 4, 5].map((star) => (
+                                                        Array.from({ length: item.rating }).map((_, index) => (
 
                                                             <Star
-                                                                key={star}
+                                                                key={index}
                                                                 size={18}
                                                                 className={
-                                                                    star <= item.rating
+                                                                    index < item.rating
                                                                         ?
                                                                         "fill-[#52B788] text-[#52B788]"
                                                                         :
@@ -327,6 +296,7 @@ export default function TestimonialsPage() {
 
                                                         ))
                                                     }
+
 
                                                 </div>
 
@@ -346,7 +316,7 @@ export default function TestimonialsPage() {
                                             leading-relaxed
                                             text-slate-200
                                             ">
-                                                "{item.review}"
+                                                "{item.message}"
                                             </p>
 
 
@@ -360,7 +330,11 @@ export default function TestimonialsPage() {
 
 
                                                 <img
-                                                    src={item.image}
+                                                    src={
+                                                        item.image
+                                                            ? `/${item.image}`
+                                                            : "/default-user.png"
+                                                    }
                                                     alt={item.name}
                                                     className="
                                                     h-14

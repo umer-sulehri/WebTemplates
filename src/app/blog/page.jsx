@@ -1,8 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getBlogs } from "@/lib/api/blogs";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/Components/Navbar";
+
 import {
     ArrowRight,
     Calendar,
@@ -177,8 +179,25 @@ const blogs = [
 
 export default function Blog() {
 
+    const [blogs, setBlogs] = useState([]);
+
     const [active, setActive] = useState("All");
 
+    useEffect(() => {
+        fetchBlogs();
+    }, []);
+
+    const fetchBlogs = async () => {
+        try {
+            const data = await getBlogs();
+
+            const activeBlogs = data.filter((item) => item.status == 1);
+
+            setBlogs(activeBlogs);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const filteredBlogs =
         active === "All"
@@ -328,9 +347,10 @@ export default function Blog() {
 
                         {
                             [
-                                ["50+", "Articles"],
-                                ["10+", "Categories"],
-                                ["1000+", "Readers"]
+                                [blogs.length, "Articles"],
+                                [new Set(blogs.map((b) => b.category)).size, "Categories"],
+                                ["1000+", "Readers"],
+
                             ].map((item, index) => (
 
                                 <motion.div
@@ -511,10 +531,12 @@ export default function Blog() {
 
                                             <img
 
-                                                src={blog.image}
-
+                                                src={
+                                                    blog.image
+                                                        ? `http://127.0.0.1:8000/storage/${blog.image}`
+                                                        : "/default-blog.jpg"
+                                                }
                                                 alt={blog.title}
-
                                                 className="
                         h-60
                         w-full
@@ -613,7 +635,11 @@ export default function Blog() {
                     gap-1
                     ">
                                                     <Calendar size={14} />
-                                                    {blog.date}
+                                                    {new Date(blog.created_at).toLocaleDateString("en-US", {
+                                                        year: "numeric",
+                                                        month: "long",
+                                                        day: "numeric",
+                                                    })}
                                                 </span>
 
 
