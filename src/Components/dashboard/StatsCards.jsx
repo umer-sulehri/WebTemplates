@@ -7,41 +7,72 @@ import {
     PhoneMissed,
     Users,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+    getScheduleCalls,
+} from "@/lib/api/sheduleCalls";
 
 
-const stats = [
-    {
-        title: "Total Calls",
-        value: "12,540",
-        growth: "+12.5%",
-        icon: Phone,
-        color: "from-blue-500 to-cyan-400",
-    },
-    {
-        title: "Answered Calls",
-        value: "10,850",
-        growth: "+8.2%",
-        icon: PhoneCall,
-        color: "from-green-500 to-emerald-400",
-    },
-    {
-        title: "Missed Calls",
-        value: "1,690",
-        growth: "-3.4%",
-        icon: PhoneMissed,
-        color: "from-red-500 to-orange-400",
-    },
-    {
-        title: "Active Agents",
-        value: "24",
-        growth: "+5 New",
-        icon: Users,
-        color: "from-purple-500 to-pink-400",
-    },
-];
 
 
 export default function StatsCards() {
+    const [stats, setStats] = useState([]);
+    useEffect(() => {
+        fetchStats();
+    }, []);
+
+    const fetchStats = async () => {
+        try {
+            const calls = await getScheduleCalls();
+
+            const totalCalls = calls.length;
+
+            const answeredCalls = calls.filter(
+                (item) => item.status === "confirmed"
+            ).length;
+
+            const missedCalls = calls.filter(
+                (item) => item.status === "cancelled"
+            ).length;
+
+            const pendingCalls = calls.filter(
+                (item) => item.status === "pending"
+            ).length;
+
+            setStats([
+                {
+                    title: "Total Calls",
+                    value: totalCalls,
+                    growth: "",
+                    icon: Phone,
+                    color: "from-blue-500 to-cyan-400",
+                },
+                {
+                    title: "Answered Calls",
+                    value: answeredCalls,
+                    growth: "",
+                    icon: PhoneCall,
+                    color: "from-green-500 to-emerald-400",
+                },
+                {
+                    title: "Missed Calls",
+                    value: missedCalls,
+                    growth: "",
+                    icon: PhoneMissed,
+                    color: "from-red-500 to-orange-400",
+                },
+                {
+                    title: "Pending Calls",
+                    value: pendingCalls,
+                    growth: "",
+                    icon: Users,
+                    color: "from-purple-500 to-pink-400",
+                },
+            ]);
+        } catch (error) {
+            console.log(error);
+        }
+    };
     return (
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
@@ -123,13 +154,11 @@ export default function StatsCards() {
                                     </div>
 
 
-                                    <span className="
-                                    text-sm
-                                    text-green-400
-                                    font-medium
-                                    ">
-                                        {item.growth}
-                                    </span>
+                                    {item.growth && (
+                                        <span className="text-sm text-green-400 font-medium">
+                                            {item.growth}
+                                        </span>
+                                    )}
 
                                 </div>
 

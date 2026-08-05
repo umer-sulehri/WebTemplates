@@ -8,6 +8,10 @@ import {
     Phone,
 } from "lucide-react";
 
+import { useEffect, useState } from "react";
+import { getScheduleCalls } from "@/lib/api/sheduleCalls";
+import { getPortfolios } from "@/lib/api/portfolio";
+import { getServices } from "@/lib/api/services";
 
 const activities = [
     {
@@ -51,6 +55,78 @@ const calls = [
 
 
 export default function RecentActivity() {
+
+    const [activities, setActivities] = useState([]);
+    const [calls, setCalls] = useState([]);
+
+    useEffect(() => {
+        fetchRecentData();
+    }, []);
+
+    const fetchRecentData = async () => {
+        try {
+            const [scheduleCalls, portfolios, services] =
+                await Promise.all([
+                    getScheduleCalls(),
+                    getPortfolios(),
+                    getServices(),
+                ]);
+
+            // Latest Calls (last 5)
+            setCalls(
+                scheduleCalls
+                    .slice(0, 5)
+                    .map(call => ({
+                        name: call.name,
+                        agent: "Website",
+                        duration: call.time,
+                        status:
+                            call.status === "confirmed"
+                                ? "Completed"
+                                : call.status === "cancelled"
+                                    ? "Missed"
+                                    : "Pending",
+                    }))
+            );
+
+            // Recent Activity
+            const recentActivities = [];
+
+            portfolios.slice(0, 2).forEach(item => {
+                recentActivities.push({
+                    title: `Portfolio "${item.title}" added`,
+                    time: item.created_at,
+                    icon: Briefcase,
+                });
+            });
+
+            services.slice(0, 2).forEach(item => {
+                recentActivities.push({
+                    title: `Service "${item.title}" added`,
+                    time: item.created_at,
+                    icon: CheckCircle,
+                });
+            });
+
+            scheduleCalls.slice(0, 2).forEach(item => {
+                recentActivities.push({
+                    title: `New call from ${item.name}`,
+                    time: item.created_at,
+                    icon: MessageSquare,
+                });
+            });
+
+            recentActivities.sort(
+                (a, b) =>
+                    new Date(b.time) - new Date(a.time)
+            );
+
+            setActivities(recentActivities.slice(0, 6));
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     return (
 
@@ -138,11 +214,8 @@ export default function RecentActivity() {
                                             {item.title}
                                         </h3>
 
-                                        <p className="
-                                        text-gray-400
-                                        text-xs
-                                        ">
-                                            {item.time}
+                                        <p className="text-gray-400 text-xs">
+                                            {new Date(item.time).toLocaleString()}
                                         </p>
 
                                     </div>

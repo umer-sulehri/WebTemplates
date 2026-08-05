@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
     BriefcaseBusiness,
@@ -10,54 +11,72 @@ import {
     Mail,
 } from "lucide-react";
 
-
-const overview = [
-    {
-        title: "Portfolio Projects",
-        value: "48",
-        description: "Total projects added",
-        icon: BriefcaseBusiness,
-        color: "from-blue-500 to-cyan-400",
-    },
-    {
-        title: "Services",
-        value: "12",
-        description: "Active services",
-        icon: Settings,
-        color: "from-purple-500 to-pink-400",
-    },
-    {
-        title: "Blog Posts",
-        value: "86",
-        description: "Published articles",
-        icon: FileText,
-        color: "from-orange-500 to-yellow-400",
-    },
-    {
-        title: "Testimonials",
-        value: "124",
-        description: "Customer reviews",
-        icon: Star,
-        color: "from-green-500 to-emerald-400",
-    },
-    {
-        title: "Team Members",
-        value: "18",
-        description: "Active members",
-        icon: Users,
-        color: "from-indigo-500 to-blue-400",
-    },
-    {
-        title: "Messages",
-        value: "56",
-        description: "New inquiries",
-        icon: Mail,
-        color: "from-red-500 to-rose-400",
-    },
-];
-
+import { getPortfolios } from "@/lib/api/portfolio";
+import { getServices } from "@/lib/api/services";
+import { getBlogs } from "@/lib/api/blogs";
+import { getTestimonials } from "@/lib/api/testimonials";
 
 export default function CompanyOverview() {
+
+    const [overview, setOverview] = useState([]);
+
+    useEffect(() => {
+        fetchOverview();
+    }, []);
+
+    const fetchOverview = async () => {
+
+        try {
+
+            const [
+                portfolios,
+                services,
+                blogs,
+                testimonials,
+            ] = await Promise.all([
+                getPortfolios(),
+                getServices(),
+                getBlogs(),
+                getTestimonials(),
+            ]);
+
+            setOverview([
+                {
+                    title: "Portfolio Projects",
+                    value: portfolios.length,
+                    description: "Total projects added",
+                    icon: BriefcaseBusiness,
+                    color: "from-blue-500 to-cyan-400",
+                },
+                {
+                    title: "Services",
+                    value: services.length,
+                    description: "Active services",
+                    icon: Settings,
+                    color: "from-purple-500 to-pink-400",
+                },
+                {
+                    title: "Blog Posts",
+                    value: blogs.length,
+                    description: "Published articles",
+                    icon: FileText,
+                    color: "from-orange-500 to-yellow-400",
+                },
+                {
+                    title: "Testimonials",
+                    value: testimonials.length,
+                    description: "Customer reviews",
+                    icon: Star,
+                    color: "from-green-500 to-emerald-400",
+                },
+                
+            ]);
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
 
     return (
 

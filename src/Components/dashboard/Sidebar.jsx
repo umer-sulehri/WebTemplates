@@ -17,6 +17,7 @@ import {
     Settings,
     LogOut,
     Newspaper,
+    ClipboardList,
 } from "lucide-react";
 
 
@@ -67,6 +68,11 @@ const menu = [
         title: "Schedule Calls",
         href: "/admin/schedule-calls",
         icon: PhoneCall,
+    },
+    {
+        title: "Project Requests",
+        href: "/admin/project-requests",
+        icon: ClipboardList,
     },
 
 ];

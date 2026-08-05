@@ -12,57 +12,57 @@ import {
 } from "recharts";
 
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { getScheduleCalls } from "@/lib/api/sheduleCalls";
 
+const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const callsData = [
-    {
-        name: "Mon",
-        calls: 400,
-    },
-    {
-        name: "Tue",
-        calls: 700,
-    },
-    {
-        name: "Wed",
-        calls: 550,
-    },
-    {
-        name: "Thu",
-        calls: 900,
-    },
-    {
-        name: "Fri",
-        calls: 1200,
-    },
-    {
-        name: "Sat",
-        calls: 800,
-    },
-];
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-
-const visitorData = [
-    {
-        name: "Jan",
-        visitors: 2400,
-    },
-    {
-        name: "Feb",
-        visitors: 3200,
-    },
-    {
-        name: "Mar",
-        visitors: 4500,
-    },
-    {
-        name: "Apr",
-        visitors: 3800,
-    },
-];
 
 
 export default function Analytics() {
+    const[callsData, setCallsData] = useState([]);
+    const [visitorData, setVisitorData] = useState([]);
+
+    useEffect(() => {
+        fetchAnalytics();
+    }, []);
+
+    const fetchAnalytics = async () => {
+        try {
+            const calls = await getScheduleCalls();
+
+            // Weekly Calls
+            const weekly = days.map(day => ({
+                name: day,
+                calls: 0,
+            }));
+
+            calls.forEach(call => {
+                const index = new Date(call.date).getDay();
+                weekly[index].calls++;
+            });
+
+            setCallsData(weekly);
+
+            // Monthly Calls
+            const monthly = months.map(month => ({
+                name: month,
+                visitors: 0,
+            }));
+
+            calls.forEach(call => {
+                const index = new Date(call.date).getMonth();
+                monthly[index].visitors++;
+            });
+
+            setVisitorData(monthly);
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     return (
 

@@ -1,5 +1,5 @@
 "use client";
-
+import { getScheduleCalls } from "@/lib/api/sheduleCalls";
 import { motion } from "framer-motion";
 import {
     Bell,
@@ -7,13 +7,93 @@ import {
     ChevronDown,
 } from "lucide-react";
 
+import { useEffect, useState } from "react";
+import apiClient from "@/lib/api/apiClient";
+
+
 export default function Navbar() {
+
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const getUser = async () => {
+            try {
+                const response = await apiClient.get("/user");
+                setUser(response.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        getUser();
+    }, []);
+
 
     const today = new Date().toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "short",
         year: "numeric",
     });
+
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const getUser = async () => {
+            try {
+                const response = await apiClient.get("/user");
+                setUser(response.data);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        getUser();
+    }, []);
+
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    useEffect(() => {
+        const getNotifications = async () => {
+            try {
+                const calls = await getScheduleCalls();
+
+                const pendingCalls = calls
+                    .filter(call => call.status === "pending")
+                    .map(call => ({
+                        id: call.id,
+                        title: "New Schedule Call",
+                        description: `${call.name} booked ${call.service}`,
+                        time: `${call.date} ${call.time}`,
+                        read: false,
+                    }));
+
+                setNotifications(pendingCalls);
+                setUnreadCount(pendingCalls.length);
+
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        getNotifications();
+    }, []);
+
+    const handleNotificationClick = () => {
+        setShowNotifications(!showNotifications);
+
+        // Sab notifications read
+        setUnreadCount(0);
+
+        setNotifications(prev =>
+            prev.map(item => ({
+                ...item,
+                read: true,
+            }))
+        );
+    };
 
     return (
 
@@ -52,7 +132,7 @@ export default function Navbar() {
 
                     <h1 className="mt-2 text-3xl font-bold text-white">
 
-                        Welcome Back 👋
+                        Welcome Back, {loading ? "..." : user?.name} 👋
 
                     </h1>
 
@@ -116,6 +196,7 @@ export default function Navbar() {
                     {/* Notification */}
 
                     <button
+                        onClick={handleNotificationClick}
                         className="
                             relative
                             flex
@@ -136,20 +217,72 @@ export default function Navbar() {
                     >
 
                         <Bell size={20} />
+                        {unreadCount > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                                {unreadCount}
+                            </span>
+                        )}
 
-                        <span
-                            className="
-                                absolute
-                                right-2
-                                top-2
-                                h-2.5
-                                w-2.5
-                                rounded-full
-                                bg-emerald-400
-                            "
-                        />
+                        {showNotifications && (
+                            <div className="absolute right-0 top-16 w-96 rounded-2xl border border-white/10 bg-[#0B241E] shadow-xl z-50">
+
+                                <div className="border-b border-white/10 p-4">
+                                    <h3 className="text-white font-semibold">
+                                        Notifications
+                                    </h3>
+                                </div>
+
+                                <div className="max-h-96 overflow-y-auto">
+
+                                    {notifications.length === 0 ? (
+
+                                        <div className="p-6 text-center text-slate-400">
+                                            No new notifications
+                                        </div>
+
+                                    ) : (
+
+
+                                        notifications.map(item => (
+                                            <div
+                                                key={item.id}
+                                                className="border-b border-white/10 p-4 hover:bg-white/5"
+                                            >
+                                                <div className="flex justify-between">
+
+                                                    <div>
+                                                        <p className="font-semibold text-white">
+                                                            {item.title}
+                                                        </p>
+
+                                                        <p className="text-sm text-slate-400">
+                                                            {item.description}
+                                                        </p>
+
+                                                        <span className="text-xs text-emerald-400">
+                                                            {item.time}
+                                                        </span>
+                                                    </div>
+
+                                                    {!item.read && (
+                                                        <span className="h-2.5 w-2.5 rounded-full bg-green-400 mt-2"></span>
+                                                    )}
+
+                                                </div>
+                                            </div>
+                                        ))
+
+                                    )
+
+                                    }
+
+                                </div>
+
+                            </div>
+                        )}
 
                     </button>
+
 
                     {/* Profile */}
 
@@ -189,7 +322,7 @@ export default function Navbar() {
                                     text-white
                                 "
                             >
-                                A
+                                {user?.name?.charAt(0).toUpperCase() || "A"}
                             </div>
 
                             <span
@@ -211,11 +344,11 @@ export default function Navbar() {
                         <div className="hidden text-left md:block">
 
                             <h4 className="font-semibold text-white">
-                                Admin
+                                {user?.name || "Admin"}
                             </h4>
 
                             <p className="text-xs text-slate-400">
-                                Super Administrator
+                                {user?.role || "Administrator"}
                             </p>
 
                         </div>

@@ -12,10 +12,24 @@ import {
     ArrowRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { createProjectRequest } from "@/lib/api/projectRequest";
+
 
 export default function ContactPage() {
     const router = useRouter();
-
+    const [form, setForm] = useState({
+        full_name: "",
+        email: "",
+        phone: "",
+        company: "",
+        service: "",
+        project_title: "",
+        description: "",
+        budget: "",
+        timeline: "",
+        contact_method: "Email",
+        requirement_file: null,
+    });
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
@@ -23,10 +37,41 @@ export default function ContactPage() {
 
         setLoading(true);
 
-        setTimeout(() => {
-            setLoading(false);
+        try {
+
+            const formData = new FormData();
+
+            Object.keys(form).forEach((key) => {
+                formData.append(key, form[key]);
+            });
+
+            await createProjectRequest(formData);
+            setForm({
+                full_name: "",
+                email: "",
+                phone: "",
+                company: "",
+                service: "",
+                project_title: "",
+                description: "",
+                budget: "",
+                timeline: "",
+                contact_method: "Email",
+                requirement_file: null,
+            });
+            alert("Project Request Submitted Successfully");
+
             router.push("/#home");
-        }, 2000);
+
+        } catch (error) {
+            console.log(error.response?.data);
+            alert(
+                error.response?.data?.message ||
+                "Something went wrong."
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -153,11 +198,18 @@ export default function ContactPage() {
 
                                     <input
                                         type="text"
+                                        name="full_name"
+                                        value={form.full_name}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                full_name: e.target.value
+                                            })
+                                        }
                                         placeholder="Full Name"
                                         required
                                         className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-white outline-none transition focus:border-emerald-500"
                                     />
-
                                 </div>
 
                                 <div className="relative">
@@ -169,9 +221,18 @@ export default function ContactPage() {
 
                                     <input
                                         type="email"
+                                        name="email"
+                                        value={form.email}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                email: e.target.value,
+                                            })
+                                        }
                                         placeholder="Email Address"
                                         required
                                         className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-white outline-none transition focus:border-emerald-500"
+
                                     />
 
                                 </div>
@@ -191,9 +252,18 @@ export default function ContactPage() {
 
                                     <input
                                         type="tel"
+                                        name="phone"
+                                        value={form.phone}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                phone: e.target.value,
+                                            })
+                                        }
                                         placeholder="Phone Number"
                                         required
                                         className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-white outline-none transition focus:border-emerald-500"
+
                                     />
 
                                 </div>
@@ -207,6 +277,14 @@ export default function ContactPage() {
 
                                     <input
                                         type="text"
+                                        name="company"
+                                        value={form.company}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                company: e.target.value,
+                                            })
+                                        }
                                         placeholder="Company Name"
                                         className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-white outline-none transition focus:border-emerald-500"
                                     />
@@ -238,6 +316,14 @@ export default function ContactPage() {
                                             <input
                                                 type="radio"
                                                 name="service"
+                                                value={service}
+                                                checked={form.service === service}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        service: e.target.value,
+                                                    })
+                                                }
                                                 className="hidden peer"
                                             />
 
@@ -283,6 +369,14 @@ export default function ContactPage() {
 
                                 <input
                                     type="text"
+                                    name="project_title"
+                                    value={form.project_title}
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            project_title: e.target.value,
+                                        })
+                                    }
                                     placeholder="Project Title"
                                     required
                                     className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-white outline-none transition focus:border-emerald-500"
@@ -295,10 +389,18 @@ export default function ContactPage() {
                             <div>
 
                                 <textarea
+                                    name="description"
                                     rows={6}
+                                    value={form.description}
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            description: e.target.value,
+                                        })
+                                    }
                                     placeholder="Describe your project..."
                                     required
-                                    className="w-full rounded-2xl border border-white/10 bg-white/5 p-5 text-white outline-none transition resize-none focus:border-emerald-500"
+                                    className="w-full rounded-2xl border border-white/10 bg-white/5 p-4 text-white outline-none transition focus:border-emerald-500"
                                 />
 
                             </div>
@@ -307,51 +409,39 @@ export default function ContactPage() {
 
                             <div className="grid gap-5 md:grid-cols-2">
 
-                                <select className="h-14 rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none focus:border-emerald-500">
-
-                                    <option className="bg-[#081E1A]">
-                                        Select Budget
-                                    </option>
-
-                                    <option className="bg-[#081E1A]">
-                                        Under £500
-                                    </option>
-
-                                    <option className="bg-[#081E1A]">
-                                        £500 - £2,000
-                                    </option>
-
-                                    <option className="bg-[#081E1A]">
-                                        £2,000 - £5,000
-                                    </option>
-
-                                    <option className="bg-[#081E1A]">
-                                        £5,000+
-                                    </option>
+                                <select
+                                    value={form.budget}
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            budget: e.target.value,
+                                        })
+                                    }
+                                    className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-white outline-none transition focus:border-emerald-500"
+                                >
+                                    <option value="">Select Budget</option>
+                                    <option value="Under £500">Under £500</option>
+                                    <option value="£500 - £2,000">£500 - £2,000</option>
+                                    <option value="£2,000 - £5,000">£2,000 - £5,000</option>
+                                    <option value="£5,000+">£5,000+</option>
 
                                 </select>
 
-                                <select className="h-14 rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none focus:border-emerald-500">
-
-                                    <option className="bg-[#081E1A]">
-                                        Timeline
-                                    </option>
-
-                                    <option className="bg-[#081E1A]">
-                                        ASAP
-                                    </option>
-
-                                    <option className="bg-[#081E1A]">
-                                        1 Month
-                                    </option>
-
-                                    <option className="bg-[#081E1A]">
-                                        2-3 Months
-                                    </option>
-
-                                    <option className="bg-[#081E1A]">
-                                        Flexible
-                                    </option>
+                                <select
+                                    value={form.timeline}
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            timeline: e.target.value,
+                                        })
+                                    }
+                                    className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-white outline-none transition focus:border-emerald-500"
+                                >
+                                    <option value="">Timeline</option>
+                                    <option value="ASAP">ASAP</option>
+                                    <option value="1 Month">1 Month</option>
+                                    <option value="2-3 Months">2-3 Months</option>
+                                    <option value="Flexible">Flexible</option>
 
                                 </select>
 
@@ -376,6 +466,13 @@ export default function ContactPage() {
                                 <input
                                     type="file"
                                     className="hidden"
+                                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            requirement_file: e.target.files?.[0] || null,
+                                        })
+                                    }
                                 />
 
                             </label>
@@ -395,9 +492,16 @@ export default function ContactPage() {
                                         >
                                             <input
                                                 type="radio"
-                                                name="contactMethod"
+                                                name="contact_method"
+                                                value={item}
+                                                checked={form.contact_method === item}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        contact_method: e.target.value,
+                                                    })
+                                                }
                                                 className="hidden peer"
-                                                defaultChecked={item === "Email"}
                                             />
 
                                             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center text-slate-300 transition-all duration-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 peer-checked:text-white hover:border-emerald-400">

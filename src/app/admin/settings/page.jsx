@@ -9,9 +9,65 @@ import {
     Palette,
     Save
 } from "lucide-react";
-
+import { useEffect, useState } from "react";
+import apiClient from "@/lib/api/apiClient";
+import { getProfile, updateProfile, changePassword } from "@/lib/api/auth";
 
 export default function SettingsPage() {
+    const [form, setForm] = useState({
+        name: "",
+        email: "",
+    });
+
+    const handleSave = async () => {
+        try {
+            await updateProfile(form);
+            alert("Profile Updated Successfully");
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+
+
+    useEffect(() => {
+        fetchUser();
+    }, []);
+
+    const fetchUser = async () => {
+        try {
+            const user = await getProfile();
+
+            setForm({
+                name: user.name,
+                email: user.email,
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const [passwordForm, setPasswordForm] = useState({
+        current_password: "",
+        new_password: "",
+    });
+
+    const handleChangePassword = async () => {
+        try {
+            const response = await changePassword(passwordForm);
+
+            alert(response.message);
+
+            setPasswordForm({
+                current_password: "",
+                new_password: "",
+            });
+
+        } catch (error) {
+            console.log(error.response?.data);
+            alert(error.response?.data?.message || "Password update failed");
+        }
+    };
 
     return (
 
@@ -79,13 +135,25 @@ export default function SettingsPage() {
 
                     <Input
                         label="Full Name"
-                        placeholder="Admin Name"
+                        value={form.name}
+                        onChange={(e) =>
+                            setForm({
+                                ...form,
+                                name: e.target.value
+                            })
+                        }
                     />
 
 
                     <Input
                         label="Email"
-                        placeholder="admin@gmail.com"
+                        value={form.email}
+                        onChange={(e) =>
+                            setForm({
+                                ...form,
+                                email: e.target.value
+                            })
+                        }
                     />
 
 
@@ -138,26 +206,36 @@ export default function SettingsPage() {
 
 
                     <Input
-
                         label="Current Password"
-
-                        placeholder="********"
-
                         type="password"
-
+                        value={passwordForm.current_password}
+                        onChange={(e) =>
+                            setPasswordForm({
+                                ...passwordForm,
+                                current_password: e.target.value,
+                            })
+                        }
                     />
 
 
                     <Input
-
                         label="New Password"
-
-                        placeholder="********"
-
                         type="password"
-
+                        value={passwordForm.new_password}
+                        onChange={(e) =>
+                            setPasswordForm({
+                                ...passwordForm,
+                                new_password: e.target.value,
+                            })
+                        }
                     />
 
+                    <button
+                        onClick={handleChangePassword}
+                        className="mt-4 w-full rounded-xl bg-emerald-500 py-3 text-white font-semibold hover:bg-blue-700 transition"
+                    >
+                        Update Password
+                    </button>
 
                 </SettingCard>
 
@@ -289,21 +367,21 @@ export default function SettingsPage() {
             {/* Save Button */}
 
 
-            <button
+            <button onClick={handleSave}
 
                 className="
-            flex
-            items-center
-            gap-2
-            px-6
-            py-3
-            rounded-xl
-            bg-emerald-500
-            text-white
-            font-semibold
-            hover:scale-105
-            transition
-            "
+                flex
+                items-center
+                gap-2
+                px-6
+                py-3
+                rounded-xl
+                bg-emerald-500
+                text-white
+                font-semibold
+                hover:scale-105
+                transition
+                "
 
             >
 
@@ -390,7 +468,7 @@ function SettingCard({ icon, title, children }) {
 
 
 
-function Input({ label, placeholder, type = "text" }) {
+function Input({ label, value, onChange, type = "text" }) {
 
 
     return (
@@ -408,8 +486,8 @@ function Input({ label, placeholder, type = "text" }) {
             <input
 
                 type={type}
-
-                placeholder={placeholder}
+                value={value}
+                onChange={onChange}
 
                 className="
             mt-2
