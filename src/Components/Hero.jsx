@@ -16,64 +16,19 @@ export default function Hero() {
 
     return (
 
-        <section
-            id="home"
-            className="
-            relative
-            overflow-hidden
-            min-h-screen
-            flex
-            items-center
-            bg-gradient-to-b
-            from-[#0B1F16]
-            via-[#163D2B]
-        to-[#0B1F16]
-            pt-32
-            pb-20
-            
-            "
-        >
+        <section id="home" className="relative overflow-hidden min-h-screen flex items-center bg-gradient-to-b from-[#0B1F16] via-[#163D2B] to-[#0B1F16] pt-32 pb-20">
 
 
             {/* Background Glow */}
 
-            <div className="
-        absolute
-        top-20
-        left-20
-        h-72
-        w-72
-        rounded-full
-        bg-[#078A7A]/20
-        blur-[120px]
-        "
-            />
+            <div className=" absolute top-20n left-20n h-72n w-72n rounded-fulln bg-[#078A7A]/20n blur-[120px]n "  />
 
 
-            <div className="
-        absolute
-        right-20
-        bottom-20
-        h-80
-        w-80
-        rounded-full
-        bg-[#3BAE6D]/20
-        blur-[120px]
-        "
-            />
+            <div className="  absolute  right-20  bottom-20  h-80  w-80  rounded-full  bg-[#3BAE6D]/20  blur-[120px] " />
 
 
 
-            <div className="
-        relative
-        mx-auto
-        max-w-7xl
-        px-6
-        grid
-        lg:grid-cols-2
-        gap-14
-        items-center
-        ">
+            <div className=" relative mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-14 items-center  ">
 
 
 
@@ -99,20 +54,7 @@ export default function Hero() {
                 >
 
 
-                    <div className="
-        inline-flex
-        items-center
-        gap-2
-        rounded-full
-        border
-        border-[#078A7A]/40
-        bg-[#078A7A]/10
-        px-4
-        py-2
-        text-sm
-        text-[#74C69D]
-        mb-6
-        ">
+                    <div className="  inline-flex   items-center   gap-2  rounded-full  border  border-[#078A7A]/40  bg-[#078A7A]/10  px-4  py-2  text-sm  text-[#74C69D]  mb-6  ">
 
                         <Sparkles size={16} />
 
@@ -123,24 +65,11 @@ export default function Hero() {
 
 
 
-                    <h1 className="
-        text-4xl
-        md:text-6xl
-        font-bold
-        leading-tight
-        text-white
-        ">
+                    <h1 className=" text-4xl md:text-6xl font-bold leading-tight text-white">
 
                         Build Modern
 
-                        <span className="
-        block
-        bg-gradient-to-r
-        from-[#74C69D]
-        to-[#078A7A]
-        bg-clip-text
-        text-transparent
-        ">
+                        <span className="block bg-gradient-to-r from-[#74C69D] to-[#078A7A] bg-clip-text text-transparent">
 
                             Digital Experiences
 
@@ -154,13 +83,7 @@ export default function Hero() {
 
 
 
-                    <p className="
-        mt-6
-        max-w-xl
-        text-lg
-        leading-relaxed
-        text-gray-400
-        ">
+                    <p className=" mt-6 max-w-xl text-lg leading-relaxed text-gray-400 ">
 
                         We create fast, scalable and beautiful websites
                         using modern technologies with creative design
@@ -171,34 +94,14 @@ export default function Hero() {
 
 
 
-                    <div className="
-        mt-8
-        flex
-        flex-wrap
-        gap-5
-        ">
+                    <div className="mt-8  flex  flex-wrap gap-5  ">
 
 
                         <Link
 
                             href="/Form"
 
-                            className="
-        flex
-        items-center
-        gap-2
-        rounded-full
-        bg-[#078A7A]
-        px-7
-        py-3.5
-        font-semibold
-        text-white
-        transition
-        hover:bg-[#06695E]
-        hover:scale-105
-        "
-
-                        >
+                            className="flex items-center gap-2 rounded-full bg-[#078A7A] px-7 py-3.5 font-semibold text-white transition hover:bg-[#06695E] hover:scale-105" >
 
                             Get Started
 
@@ -212,22 +115,7 @@ export default function Hero() {
 
                             href="/services"
 
-                            className="
-        flex
-        items-center
-        gap-2
-        rounded-full
-        border
-        border-white/20
-        px-7
-        py-3.5
-        font-semibold
-        text-white
-        transition
-        hover:bg-white/10
-        "
-
-                        >
+                            className="flex items-center gap-2 rounded-full border border-white/20 px-7 py-3.5 font-semibold text-white transition hover:bg-white/10" >
 
                             <PlayCircle size={18} />
 
@@ -244,11 +132,7 @@ export default function Hero() {
 
                     {/* Stats */}
 
-                    <div className="
-        mt-10
-        flex
-        gap-10
-        ">
+                    <div className="mt-10 flex gap-10">
 
 
                         <div>
@@ -315,11 +199,7 @@ export default function Hero() {
                         duration: 0.9
                     }}
 
-                    className="
-        relative
-        "
-
-                >
+                    className="relative">
 
 
 
@@ -334,18 +214,7 @@ export default function Hero() {
                             repeat: Infinity
                         }}
 
-                        className="
-        relative
-        rounded-3xl
-        border
-        border-white/10
-        bg-white/5
-        backdrop-blur-xl
-        p-6
-        shadow-2xl
-        "
-
-                    >
+                        className="relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-2xl">
 
 
                         <Image
@@ -358,12 +227,7 @@ export default function Hero() {
 
                             height={500}
 
-                            className="
-        rounded-2xl
-        object-cover
-        "
-
-                        />
+                            className="rounded-2xl object-cover w-full h-auto" />
 
 
                     </motion.div>
@@ -385,19 +249,7 @@ export default function Hero() {
                             repeat: Infinity
                         }}
 
-                        className="
-        absolute
-        -left-6
-        top-20
-        rounded-2xl
-        bg-[#102E22]
-        border
-        border-white/10
-        p-4
-        text-white
-        "
-
-                    >
+                        className="absolute -left-6 top-20 rounded-2xl bg-[#102E22] border border-white/10  p-4 text-white">
 
                         <Code2 />
 
@@ -422,19 +274,7 @@ export default function Hero() {
                             repeat: Infinity
                         }}
 
-                        className="
-        absolute
-        -right-5
-        bottom-20
-        rounded-2xl
-        bg-[#102E22]
-        border
-        border-white/10
-        p-4
-        text-white
-        "
-
-                    >
+                        className="absolute -right-5 bottom-20 rounded-2xl bg-[#102E22] border border-white/10 p-4 text-white">
 
                         <Rocket />
 

@@ -12,8 +12,7 @@ import {
     ArrowRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createProjectRequest } from "@/lib/api/projectRequest";
-
+import { submitForm } from "@/lib/api/form";
 
 export default function ContactPage() {
     const router = useRouter();
@@ -41,11 +40,33 @@ export default function ContactPage() {
 
             const formData = new FormData();
 
-            Object.keys(form).forEach((key) => {
-                formData.append(key, form[key]);
-            });
+            formData.append("full_name", form.full_name);
+            formData.append("email", form.email);
+            formData.append("phone", form.phone);
+            formData.append("company", form.company);
+            formData.append("service", form.service);
+            formData.append("project_title", form.project_title);
+            formData.append("description", form.description);
+            formData.append("budget", form.budget);
+            formData.append("timeline", form.timeline);
+            formData.append("contact_method", form.contact_method);
 
-            await createProjectRequest(formData);
+
+            if (form.requirement_file) {
+                formData.append(
+                    "requirement_file",
+                    form.requirement_file
+                );
+            }
+
+
+            const response = await submitForm(formData);
+
+            console.log(response);
+
+            alert("Request submitted successfully");
+
+
             setForm({
                 full_name: "",
                 email: "",
@@ -59,18 +80,18 @@ export default function ContactPage() {
                 contact_method: "Email",
                 requirement_file: null,
             });
-            alert("Project Request Submitted Successfully");
 
-            router.push("/#home");
 
         } catch (error) {
-            console.log(error.response?.data);
-            alert(
-                error.response?.data?.message ||
-                "Something went wrong."
+
+            console.log(
+                error.response?.data || error.message
             );
+
         } finally {
+
             setLoading(false);
+
         }
     };
 
@@ -460,19 +481,23 @@ export default function ContactPage() {
                                 </h4>
 
                                 <p className="mt-2 text-center text-sm text-slate-400">
-                                    PDF, DOCX, PNG, JPG
+                                    {form.requirement_file
+                                        ? form.requirement_file.name
+                                        : "PDF, DOCX, PNG, JPG"}
                                 </p>
 
                                 <input
                                     type="file"
                                     className="hidden"
                                     accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                                    onChange={(e) =>
+                                    onChange={(e) => {
+                                        console.log(e.target.files[0]);
+
                                         setForm({
                                             ...form,
-                                            requirement_file: e.target.files?.[0] || null,
-                                        })
-                                    }
+                                            requirement_file: e.target.files[0],
+                                        });
+                                    }}
                                 />
 
                             </label>
