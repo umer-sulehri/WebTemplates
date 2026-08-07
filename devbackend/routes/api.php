@@ -9,7 +9,7 @@ use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ScheduleCallController;
 use App\Http\Controllers\ProjectRequestController;
-
+use App\Http\Controllers\ClientProjectRequestController;
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -27,6 +27,8 @@ Route::apiResource('blogs', BlogController::class);
 Route::apiResource('schedule-calls', ScheduleCallController::class);
 
 Route::apiResource('project-requests', ProjectRequestController::class);
+
+Route::post('/client-project-request', [ClientProjectRequestController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
 

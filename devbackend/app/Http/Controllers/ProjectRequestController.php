@@ -8,36 +8,27 @@ use Illuminate\Support\Facades\Storage;
 
 class ProjectRequestController extends Controller
 {
+
     // Get All Requests
     public function index()
     {
         return response()->json(
             ProjectRequest::latest()->get()
         );
+
     }
 
     // Store Request
     public function store(Request $request)
     {
         $request->validate([
-            'full_name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'phone' => 'required|string|max:20',
-            'company' => 'nullable|string|max:255',
-            'service' => 'required|string',
-            'project_title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'budget' => 'required|string',
-            'timeline' => 'required|string',
-            'contact_method' => 'required|string',
-            'requirement_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
+            // validation
         ]);
 
         $file = null;
 
         if ($request->hasFile('requirement_file')) {
-            $file = $request
-                ->file('requirement_file')
+            $file = $request->file('requirement_file')
                 ->store('project_requests', 'public');
         }
 
