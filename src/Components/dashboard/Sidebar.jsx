@@ -103,17 +103,7 @@ export default function Sidebar() {
 
     return (
 
-        <aside
-            className="
-                w-[290px]
-                min-h-screen
-                bg-[#061A16]
-                border-r
-                border-white/10
-                flex
-                flex-col
-            "
-        >
+        <aside className="w-[290px] h-screen bg-[#061A16] border-r border-white/10 flex flex-col">
 
             {/* Logo */}
 

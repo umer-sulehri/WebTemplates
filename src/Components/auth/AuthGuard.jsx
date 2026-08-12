@@ -1,5 +1,5 @@
 "use client";
-
+console.log("AUTH GUARD LOADED");
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -8,6 +8,7 @@ export default function AuthGuard({ children }) {
     const [checking, setChecking] = useState(true);
 
     useEffect(() => {
+        console.log("AuthGuard Loaded");
         const token = localStorage.getItem("token");
 
         if (!token) {
