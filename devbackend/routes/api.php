@@ -10,6 +10,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ScheduleCallController;
 use App\Http\Controllers\ProjectRequestController;
 use App\Http\Controllers\ClientProjectRequestController;
+use App\Http\Controllers\TeamController;
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -30,6 +31,7 @@ Route::apiResource('project-requests', ProjectRequestController::class);
 
 Route::post('/client-project-request', [ClientProjectRequestController::class, 'store']);
 
+Route::apiResource('teams', TeamController::class);
 Route::middleware('auth:sanctum')->group(function () {
 
 

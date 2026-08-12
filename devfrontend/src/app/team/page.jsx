@@ -1,6 +1,7 @@
 "use client";
-import Navbar from "@/components/Navbar"; 
-import { useState } from "react";
+import Navbar from "@/components/Navbar";
+import { useEffect, useState } from "react";
+import { getTeams } from "@/lib/api/team";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     X,
@@ -17,119 +18,31 @@ import {
     FaTwitter,
 } from "react-icons/fa";
 
-const teamMembers = [
-    {
-        id: 1,
-        name: "Alex Morgan",
-        role: "Chief Executive Officer",
-        image:
-            "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=900&q=85",
-        bio: "Alex leads the team with a strong focus on innovation, business strategy and building meaningful digital experiences.",
-        experience: "10+ Years",
-        education: "MBA — Business & Technology",
-        email: "alex@example.com",
-        phone: "+92 300 1234567",
-        skills: ["Leadership", "Strategy", "Business Development"],
-        linkedin: "#",
-        instagram: "#",
-        facebook: "#",
-        twitter: "#",
-    },
 
-    {
-        id: 2,
-        name: "Sophia Williams",
-        role: "Creative Director",
-        image:
-            "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=900&q=85",
-        bio: "Sophia turns ideas into strong visual identities and engaging digital experiences through creativity and design.",
-        experience: "8+ Years",
-        education: "MA — Graphic Design",
-        email: "sophia@example.com",
-        phone: "+92 301 1234567",
-        skills: ["UI/UX", "Branding", "Creative Direction"],
-        linkedin: "#",
-        instagram: "#",
-        facebook: "#",
-        twitter: "#",
-    },
-
-    {
-        id: 3,
-        name: "Daniel Carter",
-        role: "Lead Developer",
-        image:
-            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=85",
-        bio: "Daniel develops scalable applications and robust technical solutions using modern web technologies.",
-        experience: "7+ Years",
-        education: "BS — Computer Science",
-        email: "daniel@example.com",
-        phone: "+92 302 1234567",
-        skills: ["Next.js", "Laravel", "React", "APIs"],
-        linkedin: "#",
-        instagram: "#",
-        facebook: "#",
-        twitter: "#",
-    },
-
-    {
-        id: 4,
-        name: "Emily Johnson",
-        role: "UI/UX Designer",
-        image:
-            "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=900&q=85",
-        bio: "Emily creates clean, intuitive and user-focused interfaces that make digital products easier and more enjoyable to use.",
-        experience: "6+ Years",
-        education: "BS — Interaction Design",
-        email: "emily@example.com",
-        phone: "+92 303 1234567",
-        skills: ["UI Design", "UX Research", "Prototyping"],
-        linkedin: "#",
-        instagram: "#",
-        facebook: "#",
-        twitter: "#",
-    },
-
-    {
-        id: 5,
-        name: "Michael Brown",
-        role: "Backend Engineer",
-        image:
-            "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=900&q=85",
-        bio: "Michael works on backend architecture, APIs and databases to create secure and reliable applications.",
-        experience: "6+ Years",
-        education: "BS — Software Engineering",
-        email: "michael@example.com",
-        phone: "+92 304 1234567",
-        skills: ["PHP", "Laravel", "MySQL", "REST API"],
-        linkedin: "#",
-        instagram: "#",
-        facebook: "#",
-        twitter: "#",
-    },
-
-    {
-        id: 6,
-        name: "Olivia Smith",
-        role: "Project Manager",
-        image:
-            "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=900&q=85",
-        bio: "Olivia manages projects, timelines and communication to ensure every project reaches its goals smoothly.",
-        experience: "7+ Years",
-        education: "BS — Project Management",
-        email: "olivia@example.com",
-        phone: "+92 305 1234567",
-        skills: ["Management", "Agile", "Client Relations"],
-        linkedin: "#",
-        instagram: "#",
-        facebook: "#",
-        twitter: "#",
-    },
-];
 
 export default function TeamPage() {
+    const [teamMembers, setTeamMembers] = useState([]);
     const [selectedMember, setSelectedMember] = useState(null);
+    const [loading, setLoading] = useState(true);
 
+    useEffect(() => {
+        const fetchTeams = async () => {
+            try {
+                const data = await getTeams();
+
+                console.log("Team API Response:", data);
+
+                setTeamMembers(Array.isArray(data) ? data : []);
+            } catch (error) {
+                console.error("Failed to fetch team:", error);
+                setTeamMembers([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTeams();
+    }, []);
     return (
         <main className="min-h-screen overflow-hidden bg-[#081C15] text-white">
             <Navbar />
@@ -285,7 +198,7 @@ export default function TeamPage() {
                                 <div className="relative overflow-hidden rounded-[25px]">
 
                                     <motion.img
-                                        src={teamMembers[0].image}
+                                        src={teamMembers[0]?.image || "/devonsite.jpg"}
                                         alt="Team member"
                                         animate={{ scale: [1, 1.05, 1] }}
                                         transition={{
@@ -374,93 +287,108 @@ export default function TeamPage() {
                     {/* CARDS */}
                     <div className="mt-16 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
 
-                        {teamMembers.map((member, index) => (
-                            <motion.button
-                                key={member.id}
-                                initial={{
-                                    opacity: 0,
-                                    y: 60,
-                                }}
-                                whileInView={{
-                                    opacity: 1,
-                                    y: 0,
-                                }}
-                                viewport={{
-                                    once: true,
-                                    amount: 0.15,
-                                }}
-                                transition={{
-                                    duration: 0.65,
-                                    delay: index * 0.1,
-                                }}
-                                whileHover={{
-                                    y: -10,
-                                }}
-                                whileTap={{
-                                    scale: 0.98,
-                                }}
-                                onClick={() => setSelectedMember(member)}
-                                className="group text-left"
-                            >
+                        {loading ? (
+                            <div className="col-span-full py-20 text-center">
+                                <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-[#52D681]/30 border-t-[#52D681]" />
+                                <p className="mt-4 text-gray-400">
+                                    Loading team members...
+                                </p>
+                            </div>
+                        ) : teamMembers.length === 0 ? (
+                            <div className="col-span-full py-20 text-center">
+                                <p className="text-gray-400">
+                                    No team members found.
+                                </p>
+                            </div>
+                        ) : (
+                            teamMembers.map((member, index) => (
+                                <motion.button
+                                    key={member.id}
+                                    initial={{
+                                        opacity: 0,
+                                        y: 60,
+                                    }}
+                                    whileInView={{
+                                        opacity: 1,
+                                        y: 0,
+                                    }}
+                                    viewport={{
+                                        once: true,
+                                        amount: 0.15,
+                                    }}
+                                    transition={{
+                                        duration: 0.65,
+                                        delay: index * 0.1,
+                                    }}
+                                    whileHover={{
+                                        y: -10,
+                                    }}
+                                    whileTap={{
+                                        scale: 0.98,
+                                    }}
+                                    onClick={() => setSelectedMember(member)}
+                                    className="group text-left"
+                                >
 
-                                <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#102E22]">
+                                    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#102E22]">
 
-                                    {/* Image */}
-                                    <div className="relative aspect-[0.9] overflow-hidden">
+                                        {/* Image */}
+                                        <div className="relative aspect-[0.9] overflow-hidden">
 
-                                        <motion.img
-                                            src={member.image}
-                                            alt={member.name}
-                                            whileHover={{ scale: 1.08 }}
-                                            transition={{ duration: 0.6 }}
-                                            className="h-full w-full object-cover"
-                                        />
+                                            <motion.img
+                                                src={member.image}
+                                                alt={member.name}
+                                                whileHover={{ scale: 1.08 }}
+                                                transition={{ duration: 0.6 }}
+                                                className="h-full w-full object-cover"
+                                            />
 
-                                        <div className="absolute inset-0 bg-gradient-to-t from-[#081C15] via-transparent to-transparent" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-[#081C15] via-transparent to-transparent" />
 
-                                        {/* Number */}
-                                        <div className="absolute left-5 top-5 flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-[#081C15]/70 backdrop-blur-md">
-                                            <span className="text-sm font-bold text-[#7AE582]">
-                                                {String(index + 1).padStart(2, "0")}
+                                            {/* Number */}
+                                            <div className="absolute left-5 top-5 flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-[#081C15]/70 backdrop-blur-md">
+                                                <span className="text-sm font-bold text-[#7AE582]">
+                                                    {String(index + 1).padStart(2, "0")}
+                                                </span>
+                                            </div>
+
+                                            {/* Arrow */}
+                                            <div className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-[#52D681] text-[#081C15] opacity-0 transition-all duration-300 group-hover:opacity-100">
+                                                <ArrowUpRight size={19} />
+                                            </div>
+
+                                            {/* Name */}
+                                            <div className="absolute bottom-6 left-6 right-6">
+
+                                                <h3 className="text-2xl font-bold text-white transition-colors group-hover:text-[#7AE582]">
+                                                    {member.name}
+                                                </h3>
+
+                                                <p className="mt-1 text-sm font-medium text-[#7AE582]">
+                                                    {member.role}
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+                                        {/* Bottom */}
+                                        <div className="flex items-center justify-between border-t border-white/10 px-6 py-5">
+
+                                            <span className="text-sm text-gray-400">
+                                                View Details
                                             </span>
-                                        </div>
 
-                                        {/* Arrow */}
-                                        <div className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-[#52D681] text-[#081C15] opacity-0 transition-all duration-300 group-hover:opacity-100">
-                                            <ArrowUpRight size={19} />
-                                        </div>
-
-                                        {/* Name */}
-                                        <div className="absolute bottom-6 left-6 right-6">
-
-                                            <h3 className="text-2xl font-bold text-white transition-colors group-hover:text-[#7AE582]">
-                                                {member.name}
-                                            </h3>
-
-                                            <p className="mt-1 text-sm font-medium text-[#7AE582]">
-                                                {member.role}
-                                            </p>
+                                            <span className="text-[#7AE582] transition-transform duration-300 group-hover:translate-x-1">
+                                                →
+                                            </span>
 
                                         </div>
 
                                     </div>
-
-                                    {/* Bottom */}
-                                    <div className="flex items-center justify-between border-t border-white/10 px-6 py-5">
-
-                                        <span className="text-sm text-gray-400">
-                                            View Details
-                                        </span>
-
-                                        <span className="text-[#7AE582] transition-transform duration-300 group-hover:translate-x-1">
-                                            →
-                                        </span>
-
-                                    </div>
-
-                                </div>
-                            </motion.button>
-                        ))}
+                                </motion.button>
+                            ))
+                        )}
 
                     </div>
                 </div>
@@ -614,7 +542,10 @@ export default function TeamPage() {
 
                                     <div className="mt-4 flex flex-wrap gap-2">
 
-                                        {selectedMember.skills.map((skill) => (
+                                        {(Array.isArray(selectedMember.skills)
+                                            ? selectedMember.skills
+                                            : JSON.parse(selectedMember.skills || "[]")
+                                        ).map((skill) => (
                                             <span
                                                 key={skill}
                                                 className="rounded-full border border-[#52D681]/25 bg-[#52D681]/10 px-4 py-2 text-sm text-[#7AE582]"
@@ -622,7 +553,6 @@ export default function TeamPage() {
                                                 {skill}
                                             </span>
                                         ))}
-
                                     </div>
 
                                 </motion.div>

@@ -33,6 +33,10 @@ class DatabaseSeeder extends Seeder
             BlogSeeder::class,
         ]);
 
+        $this->call([
+            TeamSeeder::class,
+        ]);
+
     }
 
 }

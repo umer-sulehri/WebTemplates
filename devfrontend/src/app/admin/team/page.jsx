@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Plus,
@@ -21,6 +21,14 @@ import {
     FaFacebookF,
     FaTwitter,
 } from "react-icons/fa";
+
+import {
+    getTeams,
+    createTeam,
+    updateTeam,
+    deleteTeam,
+} from "@/lib/api/team";
+
 
 const initialMembers = [
     {
@@ -79,7 +87,9 @@ const emptyForm = {
 };
 
 export default function TeamAdminPage() {
-    const [members, setMembers] = useState(initialMembers);
+    const [members, setMembers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [search, setSearch] = useState("");
 
     const [showModal, setShowModal] = useState(false);
@@ -91,11 +101,13 @@ export default function TeamAdminPage() {
     const activeMembers = members.filter((item) => item.status).length;
     const inactiveMembers = members.length - activeMembers;
 
-    const filteredMembers = members.filter((member) =>
-        `${member.name} ${member.role}`
-            .toLowerCase()
-            .includes(search.toLowerCase())
-    );
+    const filteredMembers = Array.isArray(members)
+        ? members.filter((member) =>
+            `${member.name || ""} ${member.role || ""}`
+                .toLowerCase()
+                .includes(search.toLowerCase())
+        )
+        : [];
 
     // -----------------------------------------
     // FORM CHANGE
@@ -119,13 +131,11 @@ export default function TeamAdminPage() {
 
         if (!file) return;
 
-        const imageUrl = URL.createObjectURL(file);
-
-        setPreview(imageUrl);
+        setPreview(URL.createObjectURL(file));
 
         setForm((prev) => ({
             ...prev,
-            image: imageUrl,
+            image: file,
         }));
     };
 
@@ -156,7 +166,9 @@ export default function TeamAdminPage() {
             education: member.education || "",
             email: member.email || "",
             phone: member.phone || "",
-            skills: member.skills || "",
+            skills: Array.isArray(member.skills)
+                ? member.skills.join(", ")
+                : member.skills || "",
             linkedin: member.linkedin || "",
             instagram: member.instagram || "",
             facebook: member.facebook || "",
@@ -172,7 +184,7 @@ export default function TeamAdminPage() {
     // SAVE
     // -----------------------------------------
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!form.name || !form.role) {
@@ -180,42 +192,100 @@ export default function TeamAdminPage() {
             return;
         }
 
-        if (selectedMember) {
-            setMembers((prev) =>
-                prev.map((member) =>
-                    member.id === selectedMember.id
-                        ? {
-                            ...member,
-                            ...form,
-                        }
-                        : member
-                )
-            );
-        } else {
-            setMembers((prev) => [
-                {
-                    ...form,
-                    id: Date.now(),
-                },
-                ...prev,
-            ]);
-        }
+        try {
+            setSaving(true);
 
-        closeModal();
+            const formData = new FormData();
+
+            formData.append("name", form.name);
+            formData.append("role", form.role);
+            formData.append("bio", form.bio || "");
+            formData.append("experience", form.experience || "");
+            formData.append("education", form.education || "");
+            formData.append("email", form.email || "");
+            formData.append("phone", form.phone || "");
+
+            formData.append(
+                "skills",
+                Array.isArray(form.skills)
+                    ? form.skills.join(", ")
+                    : form.skills || ""
+            );
+
+            formData.append("linkedin", form.linkedin || "");
+            formData.append("instagram", form.instagram || "");
+            formData.append("facebook", form.facebook || "");
+            formData.append("twitter", form.twitter || "");
+
+            formData.append("status", form.status ? "1" : "0");
+
+            if (form.image instanceof File) {
+                formData.append("image", form.image);
+            }
+            if (selectedMember) {
+                formData.append("_method", "PUT");
+
+                await updateTeam(selectedMember.id, formData);
+
+                alert("Team member updated successfully.");
+            } else {
+                console.log("FORM IMAGE:", form.image);
+                console.log("IMAGE IS FILE:", form.image instanceof File);
+                console.log("IMAGE TYPE:", form.image?.type);
+                console.log("IMAGE NAME:", form.image?.name);
+                console.log("FORM DATA IMAGE:", formData.get("image"));
+                await createTeam(formData);
+
+                alert("Team member added successfully.");
+            }
+
+            await fetchTeams();
+
+            closeModal();
+        } catch (error) {
+            console.error("Team save error:", error);
+
+            console.error(
+                "Laravel response:",
+                error?.response?.data
+            );
+
+            alert(
+                error?.response?.data?.message ||
+                "Something went wrong while saving team member."
+            );
+        } finally {
+            setSaving(false);
+        }
     };
 
     // -----------------------------------------
     // DELETE
     // -----------------------------------------
 
-    const deleteMember = (id) => {
+    const deleteMember = async (id) => {
         const confirmDelete = window.confirm(
             "Are you sure you want to delete this team member?"
         );
 
         if (!confirmDelete) return;
 
-        setMembers((prev) => prev.filter((member) => member.id !== id));
+        try {
+            await deleteTeam(id);
+
+            setMembers((prev) =>
+                prev.filter((member) => member.id !== id)
+            );
+
+            alert("Team member deleted successfully.");
+        } catch (error) {
+            console.error("Delete team member error:", error);
+
+            alert(
+                error?.response?.data?.message ||
+                "Failed to delete team member."
+            );
+        }
     };
 
     // -----------------------------------------
@@ -227,6 +297,33 @@ export default function TeamAdminPage() {
         setSelectedMember(null);
         setForm(emptyForm);
         setPreview("");
+    };
+
+    useEffect(() => {
+        fetchTeams();
+    }, []);
+
+    const fetchTeams = async () => {
+        try {
+            setLoading(true);
+
+            const response = await getTeams();
+
+            console.log("Dashboard Team API:", response);
+
+            setMembers(
+                Array.isArray(response?.data)
+                    ? response.data
+                    : Array.isArray(response)
+                        ? response
+                        : []
+            );
+        } catch (error) {
+            console.error("Failed to fetch team members:", error);
+            setMembers([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -363,141 +460,156 @@ export default function TeamAdminPage() {
 
                         <tbody>
 
-                            {filteredMembers.map((member, index) => (
-                                <motion.tr
-                                    key={member.id}
-                                    initial={{
-                                        opacity: 0,
-                                        x: -15,
-                                    }}
-                                    animate={{
-                                        opacity: 1,
-                                        x: 0,
-                                    }}
-                                    transition={{
-                                        delay: index * 0.05,
-                                    }}
-                                    className="border-b border-white/[0.05] transition hover:bg-white/[0.025]"
-                                >
+                            {loading ? (
+                                <tr>
+                                    <td
+                                        colSpan="5"
+                                        className="px-5 py-20 text-center"
+                                    >
+                                        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-[#168BFF]/20 border-t-[#168BFF]" />
 
-                                    {/* MEMBER */}
+                                        <p className="mt-4 text-sm text-[#71827D]">
+                                            Loading team members...
+                                        </p>
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredMembers.map((member, index) => (
+                                    <motion.tr
+                                        key={member.id}
+                                        initial={{
+                                            opacity: 0,
+                                            x: -15,
+                                        }}
+                                        animate={{
+                                            opacity: 1,
+                                            x: 0,
+                                        }}
+                                        transition={{
+                                            delay: index * 0.05,
+                                        }}
+                                        className="border-b border-white/[0.05] transition hover:bg-white/[0.025]"
+                                    >
 
-                                    <td className="px-5 py-4">
+                                        {/* MEMBER */}
 
-                                        <div className="flex items-center gap-3">
+                                        <td className="px-5 py-4">
 
-                                            <div className="h-12 w-12 overflow-hidden rounded-xl bg-[#16342C]">
+                                            <div className="flex items-center gap-3">
 
-                                                {member.image ? (
-                                                    <img
-                                                        src={member.image}
-                                                        alt={member.name}
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-full items-center justify-center">
-                                                        <UserRound
-                                                            size={20}
-                                                            className="text-[#55716A]"
+                                                <div className="h-12 w-12 overflow-hidden rounded-xl bg-[#16342C]">
+
+                                                    {member.image ? (
+                                                        <img
+                                                            src={member.image}
+                                                            alt={member.name}
+                                                            className="h-full w-full object-cover"
                                                         />
-                                                    </div>
-                                                )}
+                                                    ) : (
+                                                        <div className="flex h-full items-center justify-center">
+                                                            <UserRound
+                                                                size={20}
+                                                                className="text-[#55716A]"
+                                                            />
+                                                        </div>
+                                                    )}
+
+                                                </div>
+
+                                                <div>
+                                                    <p className="font-medium">
+                                                        {member.name}
+                                                    </p>
+
+                                                    <p className="mt-0.5 text-xs text-[#71827D]">
+                                                        {member.email || "No email"}
+                                                    </p>
+                                                </div>
 
                                             </div>
 
-                                            <div>
-                                                <p className="font-medium">
-                                                    {member.name}
-                                                </p>
+                                        </td>
 
-                                                <p className="mt-0.5 text-xs text-[#71827D]">
-                                                    {member.email || "No email"}
-                                                </p>
+                                        {/* ROLE */}
+
+                                        <td className="px-5 py-4">
+
+                                            <span className="text-sm text-[#C2D0CC]">
+                                                {member.role}
+                                            </span>
+
+                                        </td>
+
+                                        {/* EXPERIENCE */}
+
+                                        <td className="px-5 py-4">
+
+                                            <div className="flex items-center gap-2 text-sm text-[#A8B9B4]">
+
+                                                <BriefcaseBusiness
+                                                    size={16}
+                                                    className="text-[#168BFF]"
+                                                />
+
+                                                {member.experience || "—"}
+
                                             </div>
 
-                                        </div>
+                                        </td>
 
-                                    </td>
+                                        {/* STATUS */}
 
-                                    {/* ROLE */}
-
-                                    <td className="px-5 py-4">
-
-                                        <span className="text-sm text-[#C2D0CC]">
-                                            {member.role}
-                                        </span>
-
-                                    </td>
-
-                                    {/* EXPERIENCE */}
-
-                                    <td className="px-5 py-4">
-
-                                        <div className="flex items-center gap-2 text-sm text-[#A8B9B4]">
-
-                                            <BriefcaseBusiness
-                                                size={16}
-                                                className="text-[#168BFF]"
-                                            />
-
-                                            {member.experience || "—"}
-
-                                        </div>
-
-                                    </td>
-
-                                    {/* STATUS */}
-
-                                    <td className="px-5 py-4">
-
-                                        <span
-                                            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${member.status
-                                                    ? "bg-[#168BFF]/10 text-[#56A9FF]"
-                                                    : "bg-white/5 text-[#75857F]"
-                                                }`}
-                                        >
+                                        <td className="px-5 py-4">
 
                                             <span
-                                                className={`h-1.5 w-1.5 rounded-full ${member.status
+                                                className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${member.status
+                                                    ? "bg-[#168BFF]/10 text-[#56A9FF]"
+                                                    : "bg-white/5 text-[#75857F]"
+                                                    }`}
+                                            >
+
+                                                <span
+                                                    className={`h-1.5 w-1.5 rounded-full ${member.status
                                                         ? "bg-[#168BFF]"
                                                         : "bg-[#687772]"
-                                                    }`}
-                                            />
+                                                        }`}
+                                                />
 
-                                            {member.status ? "Active" : "Inactive"}
+                                                {member.status ? "Active" : "Inactive"}
 
-                                        </span>
+                                            </span>
 
-                                    </td>
+                                        </td>
 
-                                    {/* ACTIONS */}
+                                        {/* ACTIONS */}
 
-                                    <td className="px-5 py-4">
+                                        <td className="px-5 py-4">
 
-                                        <div className="flex justify-end gap-2">
+                                            <div className="flex justify-end gap-2">
 
-                                            <button
-                                                onClick={() => openEdit(member)}
-                                                className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02] text-[#8D9D98] transition hover:border-[#168BFF]/30 hover:bg-[#168BFF]/10 hover:text-[#56A9FF]"
-                                                title="Edit"
-                                            >
-                                                <Pencil size={16} />
-                                            </button>
+                                                <button
+                                                    onClick={() => openEdit(member)}
+                                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02] text-[#8D9D98] transition hover:border-[#168BFF]/30 hover:bg-[#168BFF]/10 hover:text-[#56A9FF]"
+                                                    title="Edit"
+                                                >
+                                                    <Pencil size={16} />
+                                                </button>
 
-                                            <button
-                                                onClick={() => deleteMember(member.id)}
-                                                className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-500/10 bg-red-500/[0.03] text-red-400 transition hover:bg-red-500/10"
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                                <button
+                                                    onClick={() => deleteMember(member.id)}
+                                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-500/10 bg-red-500/[0.03] text-red-400 transition hover:bg-red-500/10"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
 
-                                        </div>
+                                            </div>
 
-                                    </td>
+                                        </td>
 
-                                </motion.tr>
-                            ))}
+                                    </motion.tr>
+                                ))
+                            )}
 
                         </tbody>
 
@@ -715,7 +827,7 @@ export default function TeamAdminPage() {
 
                                         <textarea
                                             name="bio"
-                                            value={form.bio}
+                                            value={form.bio ?? ""}
                                             onChange={handleChange}
                                             rows={4}
                                             placeholder="Write team member biography..."
@@ -729,7 +841,7 @@ export default function TeamAdminPage() {
                                     <FormInput
                                         label="Skills"
                                         name="skills"
-                                        value={form.skills}
+                                        value={form.skills ?? ""}
                                         onChange={handleChange}
                                         placeholder="React, Laravel, UI/UX"
                                     />
@@ -748,7 +860,7 @@ export default function TeamAdminPage() {
                                                 icon={<FaLinkedinIn />}
                                                 label="LinkedIn"
                                                 name="linkedin"
-                                                value={form.linkedin}
+                                                value={form.linkedin ?? ""}
                                                 onChange={handleChange}
                                             />
 
@@ -756,7 +868,7 @@ export default function TeamAdminPage() {
                                                 icon={<FaInstagram />}
                                                 label="Instagram"
                                                 name="instagram"
-                                                value={form.instagram}
+                                                value={form.instagram ?? ""}
                                                 onChange={handleChange}
                                             />
 
@@ -764,7 +876,7 @@ export default function TeamAdminPage() {
                                                 icon={<FaFacebookF />}
                                                 label="Facebook"
                                                 name="facebook"
-                                                value={form.facebook}
+                                                value={form.facebook ?? ""}
                                                 onChange={handleChange}
                                             />
 
@@ -772,7 +884,7 @@ export default function TeamAdminPage() {
                                                 icon={<FaTwitter />}
                                                 label="Twitter"
                                                 name="twitter"
-                                                value={form.twitter}
+                                                value={form.twitter ?? ""}
                                                 onChange={handleChange}
                                             />
 
@@ -818,11 +930,14 @@ export default function TeamAdminPage() {
 
                                         <button
                                             type="submit"
-                                            className="rounded-xl bg-gradient-to-r from-[#168BFF] to-[#7C3AED] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/10 transition hover:opacity-90"
+                                            disabled={saving}
+                                            className="rounded-xl bg-gradient-to-r from-[#168BFF] to-[#7C3AED] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/10 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
-                                            {selectedMember
-                                                ? "Update Member"
-                                                : "Add Member"}
+                                            {saving
+                                                ? "Saving..."
+                                                : selectedMember
+                                                    ? "Update Member"
+                                                    : "Add Member"}
                                         </button>
 
                                     </div>
@@ -859,7 +974,7 @@ function StatCard({ title, value, icon }) {
                     </p>
 
                     <h2 className="mt-2 text-3xl font-bold">
-                        {value}
+                        {value ?? ""}
                     </h2>
                 </div>
 
@@ -896,7 +1011,7 @@ function FormInput({
             <input
                 type={type}
                 name={name}
-                value={value}
+                value={value ?? ""}
                 onChange={onChange}
                 placeholder={placeholder}
                 required={required}
@@ -935,7 +1050,7 @@ function SocialInput({
             <input
                 type="url"
                 name={name}
-                value={value}
+                value={value ?? ""}
                 onChange={onChange}
                 placeholder={`https://${label.toLowerCase()}.com/...`}
                 className="w-full rounded-xl border border-white/[0.08] bg-[#102722] px-4 py-3 text-sm text-white outline-none placeholder:text-[#536660] focus:border-[#168BFF]/40"

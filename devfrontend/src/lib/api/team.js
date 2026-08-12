@@ -1,51 +1,28 @@
 import apiClient from "./apiClient";
 
-// Get All Team Members
-export const getTeamMembers = async () => {
-    try {
-        const response = await apiClient.get("/team");
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+export const getTeams = async () => {
+    const response = await apiClient.get("/teams");
+    return response.data;
 };
 
-// Get Single Team Member
-export const getTeamMember = async (id) => {
-    try {
-        const response = await apiClient.get(`/team/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+export const getTeam = async (id) => {
+    const response = await apiClient.get(`/teams/${id}`);
+    return response.data;
 };
 
-// Create Team Member
-export const createTeamMember = async (data) => {
-    try {
-        const response = await apiClient.post("/team", data);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+export const createTeam = async (formData) => {
+    const response = await apiClient.post("/teams", formData);
+    return response.data;
 };
 
-// Update Team Member
-export const updateTeamMember = async (id, data) => {
-    try {
-        const response = await apiClient.put(`/team/${id}`, data);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+export const updateTeam = async (id, formData) => {
+    formData.append("_method", "PUT");
+
+    const response = await apiClient.post(`/teams/${id}`, formData);
+    return response.data;
 };
 
-// Delete Team Member
-export const deleteTeamMember = async (id) => {
-    try {
-        const response = await apiClient.delete(`/team/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+export const deleteTeam = async (id) => {
+    const response = await apiClient.delete(`/teams/${id}`);
+    return response.data;
 };
