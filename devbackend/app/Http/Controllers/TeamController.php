@@ -13,6 +13,14 @@ class TeamController extends Controller
     {
         $teams = Team::latest()->get();
 
+        $teams->transform(function ($team) {
+            if ($team->image) {
+                $team->image = asset('storage/' . $team->image);
+            }
+
+            return $team;
+        });
+
         return response()->json([
             'success' => true,
             'data' => $teams,
@@ -23,6 +31,10 @@ class TeamController extends Controller
     public function show($id)
     {
         $team = Team::findOrFail($id);
+
+        if ($team->image) {
+            $team->image = asset('storage/' . $team->image);
+        }
 
         return response()->json([
             'success' => true,
@@ -36,19 +48,40 @@ class TeamController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'role' => 'required|string|max:255',
+
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+
+            'bio' => 'nullable|string',
+            'experience' => 'nullable|string|max:255',
+            'education' => 'nullable|string|max:255',
+            'email' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'skills' => 'nullable|string',
+
             'linkedin' => 'nullable|string|max:500',
-            'twitter' => 'nullable|string|max:500',
+            'instagram' => 'nullable|string|max:500',
             'facebook' => 'nullable|string|max:500',
-            'description' => 'nullable|string',
+            'twitter' => 'nullable|string|max:500',
+
+            'status' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')
+            $validated['image'] = $request
+                ->file('image')
                 ->store('team', 'public');
         }
 
+        // Agar status nahi bheja gaya to active rakho
+        if (!isset($validated['status'])) {
+            $validated['status'] = true;
+        }
+
         $team = Team::create($validated);
+
+        if ($team->image) {
+            $team->image = asset('storage/' . $team->image);
+        }
 
         return response()->json([
             'success' => true,
@@ -65,24 +98,45 @@ class TeamController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'role' => 'required|string|max:255',
+
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+
+            'bio' => 'nullable|string',
+            'experience' => 'nullable|string|max:255',
+            'education' => 'nullable|string|max:255',
+            'email' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'skills' => 'nullable|string',
+
             'linkedin' => 'nullable|string|max:500',
-            'twitter' => 'nullable|string|max:500',
+            'instagram' => 'nullable|string|max:500',
             'facebook' => 'nullable|string|max:500',
-            'description' => 'nullable|string',
+            'twitter' => 'nullable|string|max:500',
+
+            'status' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('image')) {
 
-            if ($team->image && Storage::disk('public')->exists($team->image)) {
+            if (
+                $team->image &&
+                Storage::disk('public')->exists($team->image)
+            ) {
                 Storage::disk('public')->delete($team->image);
             }
 
-            $validated['image'] = $request->file('image')
+            $validated['image'] = $request
+                ->file('image')
                 ->store('team', 'public');
         }
 
         $team->update($validated);
+
+        $team->refresh();
+
+        if ($team->image) {
+            $team->image = asset('storage/' . $team->image);
+        }
 
         return response()->json([
             'success' => true,
@@ -96,7 +150,10 @@ class TeamController extends Controller
     {
         $team = Team::findOrFail($id);
 
-        if ($team->image && Storage::disk('public')->exists($team->image)) {
+        if (
+            $team->image &&
+            Storage::disk('public')->exists($team->image)
+        ) {
             Storage::disk('public')->delete($team->image);
         }
 
@@ -107,4 +164,4 @@ class TeamController extends Controller
             'message' => 'Team member deleted successfully.',
         ]);
     }
-};
+}

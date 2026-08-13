@@ -98,9 +98,13 @@ export default function TeamAdminPage() {
     const [form, setForm] = useState(emptyForm);
     const [preview, setPreview] = useState("");
 
-    const activeMembers = members.filter((item) => item.status).length;
-    const inactiveMembers = members.length - activeMembers;
+    const activeMembers = members.filter(
+        (item) => Number(item.status) === 1
+    ).length;
 
+    const inactiveMembers = members.filter(
+        (item) => Number(item.status) === 0
+    ).length;
     const filteredMembers = Array.isArray(members)
         ? members.filter((member) =>
             `${member.name || ""} ${member.role || ""}`
@@ -264,6 +268,8 @@ export default function TeamAdminPage() {
     // -----------------------------------------
 
     const deleteMember = async (id) => {
+        console.log("DELETE BUTTON CLICKED:", id);
+
         const confirmDelete = window.confirm(
             "Are you sure you want to delete this team member?"
         );
@@ -271,7 +277,11 @@ export default function TeamAdminPage() {
         if (!confirmDelete) return;
 
         try {
+            console.log("CALLING DELETE API:", id);
+
             await deleteTeam(id);
+
+            console.log("DELETE API SUCCESS");
 
             setMembers((prev) =>
                 prev.filter((member) => member.id !== id)
@@ -280,6 +290,7 @@ export default function TeamAdminPage() {
             alert("Team member deleted successfully.");
         } catch (error) {
             console.error("Delete team member error:", error);
+            console.error("Laravel response:", error?.response?.data);
 
             alert(
                 error?.response?.data?.message ||
@@ -311,13 +322,22 @@ export default function TeamAdminPage() {
 
             console.log("Dashboard Team API:", response);
 
-            setMembers(
-                Array.isArray(response?.data)
+            const teams = Array.isArray(response)
+                ? response
+                : Array.isArray(response?.data)
                     ? response.data
-                    : Array.isArray(response)
-                        ? response
-                        : []
-            );
+                    : [];
+
+            const formattedTeams = teams.map((member) => ({
+                ...member,
+                status:
+                    member.status === true ||
+                    member.status === 1 ||
+                    member.status === "1",
+            }));
+
+            setMembers(formattedTeams);
+
         } catch (error) {
             console.error("Failed to fetch team members:", error);
             setMembers([]);
@@ -325,7 +345,6 @@ export default function TeamAdminPage() {
             setLoading(false);
         }
     };
-
     return (
         <div className="min-h-screen bg-[#071A16] px-4 py-5 text-white md:px-6 lg:px-8">
 
@@ -503,6 +522,7 @@ export default function TeamAdminPage() {
                                                         <img
                                                             src={member.image}
                                                             alt={member.name}
+
                                                             className="h-full w-full object-cover"
                                                         />
                                                     ) : (
@@ -575,8 +595,7 @@ export default function TeamAdminPage() {
                                                         }`}
                                                 />
 
-                                                {member.status ? "Active" : "Inactive"}
-
+                                                {Number(member.status) === 1 ? "Active" : "Inactive"}
                                             </span>
 
                                         </td>
@@ -588,6 +607,7 @@ export default function TeamAdminPage() {
                                             <div className="flex justify-end gap-2">
 
                                                 <button
+                                                    type="button"
                                                     onClick={() => openEdit(member)}
                                                     className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02] text-[#8D9D98] transition hover:border-[#168BFF]/30 hover:bg-[#168BFF]/10 hover:text-[#56A9FF]"
                                                     title="Edit"
@@ -596,6 +616,7 @@ export default function TeamAdminPage() {
                                                 </button>
 
                                                 <button
+                                                    type="button"
                                                     onClick={() => deleteMember(member.id)}
                                                     className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-500/10 bg-red-500/[0.03] text-red-400 transition hover:bg-red-500/10"
                                                     title="Delete"

@@ -48,6 +48,11 @@ return new class extends Migration {
             if (!Schema::hasColumn('teams', 'twitter')) {
                 $table->string('twitter')->nullable();
             }
+
+            if (!Schema::hasColumn('teams', 'status')) {
+                $table->boolean('status')->default(true);
+            }
+
         });
     }
 
@@ -66,6 +71,7 @@ return new class extends Migration {
                 'instagram',
                 'facebook',
                 'twitter',
+                'status',
             ];
 
             foreach ($columns as $column) {

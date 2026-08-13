@@ -12,9 +12,17 @@ class PortfolioController extends Controller
     // Get All Projects
     public function index()
     {
-        return response()->json(
-            Portfolio::latest()->get()
-        );
+        $portfolios = Portfolio::latest()->get();
+
+        $portfolios->transform(function ($portfolio) {
+            if ($portfolio->image) {
+                $portfolio->image = asset('storage/' . $portfolio->image);
+            }
+
+            return $portfolio;
+        });
+
+        return response()->json($portfolios);
     }
 
     // Store Project

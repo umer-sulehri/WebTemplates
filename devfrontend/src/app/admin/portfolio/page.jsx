@@ -214,7 +214,7 @@ export default function Portfolio() {
 
         }
         else {
-           await fetchProjects();
+            await fetchProjects();
 
         }
 
@@ -293,7 +293,15 @@ export default function Portfolio() {
 
     });
 
+    const getImageUrl = (image) => {
+        if (!image) return "/placeholder.jpg";
 
+        if (image.startsWith("http")) {
+            return image;
+        }
+
+        return `http://127.0.0.1:8000/storage/${image}`;
+    };
 
     return (
 
@@ -1128,8 +1136,7 @@ bg-black/20
 
                                         <img
 
-                                            src={project.image}
-
+                                            src={getImageUrl(project.image)}
                                             alt={project.title}
 
                                             className="

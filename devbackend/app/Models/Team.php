@@ -10,9 +10,20 @@ class Team extends Model
         'name',
         'role',
         'image',
+        'bio',
+        'experience',
+        'education',
+        'email',
+        'phone',
+        'skills',
         'linkedin',
-        'twitter',
+        'instagram',
         'facebook',
-        'description',
+        'twitter',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 }
