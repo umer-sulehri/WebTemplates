@@ -15,21 +15,21 @@ class ServiceSeeder extends Seeder
             [
                 'title' => "Web Development",
                 'description' => "Modern, responsive and high-performance websites tailored for your business.",
-                'image' => "/service-1.jpg",
+                'image' => "services/service-1.jpg",
                 'icon' => "Globe",
                 'learnmore' => 'Custom websites with modern technologies and responsive designs.',
             ],
             [
                 'title' => "Mobile App Development",
                 'description' => "Beautiful Android & iOS applications with exceptional user experience.",
-                'image' => "/service-2.jpg",
+                'image' => "services/service-2.jpg",
                 'icon' => "Smartphone",
                 'learnmore' => 'Custom websites with modern technologies and responsive designs.',
             ],
             [
                 'title' => "React & Next.js",
                 'description' => "Lightning-fast frontend applications using the latest React ecosystem.",
-                'image' => "/service-3.jpg",
+                'image' => "services/service-3.jpg",
                 'icon' => "Code2",
                 'learnmore' => 'Custom websites with modern technologies and responsive designs.',
             ],
@@ -37,7 +37,7 @@ class ServiceSeeder extends Seeder
             [
                 'title' => "Backend Development",
                 'description' => "Powerful APIs and scalable backend systems with Node.js & Laravel.",
-                'image' => "/service-4.jpg",
+                'image' => "services/service-4.jpg",
                 'icon' => "Database",
                 'learnmore' => 'Custom websites with modern technologies and responsive designs.',
             ],
@@ -45,7 +45,7 @@ class ServiceSeeder extends Seeder
             [
                 'title' => "WordPress",
                 'description' => "Professional CMS websites with custom themes and functionality.",
-                'image' => "/service-5.jpg",
+                'image' => "services/service-5.jpg",
                 'icon' => "LayoutDashboard",
                 'learnmore' => 'Custom websites with modern technologies and responsive designs.',
             ],
@@ -53,7 +53,7 @@ class ServiceSeeder extends Seeder
             [
                 'title' => "Cloud Solutions",
                 'description' => "Cloud deployment, DevOps and secure infrastructure management.",
-                'image' => "/service-6.jpg",
+                'image' => "services/service-6.jpg",
                 'icon' => "Cloud",
                 'learnmore' => 'Custom websites with modern technologies and responsive designs.',
             ],
@@ -61,7 +61,7 @@ class ServiceSeeder extends Seeder
             [
                 'title' => "UI / UX Design",
                 'description' => "Creative interfaces focused on usability and modern user experiences.",
-                'image' => "/services-7.jpg",
+                'image' => "services/service-7.jpg",
                 'icon' => "MonitorSmartphone",
                 'learnmore' => 'Custom websites with modern technologies and responsive designs.',
             ],
@@ -69,7 +69,7 @@ class ServiceSeeder extends Seeder
             [
                 'title' => "SEO Optimization",
                 'description' => "Increase visibility, traffic and business growth through smart SEO.",
-                'image' => "/service-8.jpg",
+                'image' => "services/service-8.jpg",
                 'icon' => "Search",
                 'learnmore' => 'Custom websites with modern technologies and responsive designs.',
             ]

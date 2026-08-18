@@ -218,7 +218,7 @@ export default function ProjectRequestsPage() {
                                 <tr>
 
                                     <td
-                                        colSpan={5}
+                                        colSpan={6}
                                         className="py-10 text-center text-slate-400"
                                     >
                                         No Project Requests Found

@@ -12,9 +12,17 @@ class TestimonialController extends Controller
      */
     public function index()
     {
-        return response()->json(
-            Testimonial::latest()->get()
-        );
+        $testimonials = Testimonial::latest()->get();
+
+        $testimonials->transform(function ($testimonial) {
+            if ($testimonial->image) {
+                $testimonial->image = asset('storage/' . $testimonial->image);
+            }
+
+            return $testimonial;
+        });
+
+        return response()->json($testimonials);
     }
 
     /**

@@ -1087,11 +1087,7 @@ transition
                         <div className="flex justify-center">
 
                             <img
-                                src={
-                                    item.image
-                                        ? `/${item.image}`
-                                        : "/default-user.png"
-                                }
+                                src={item.image || "/default-user.png"}
                                 alt={item.name}
                                 className="w-24 h-24 rounded-full object-cover border border-white/20"
                             />

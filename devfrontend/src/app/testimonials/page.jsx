@@ -330,11 +330,8 @@ export default function TestimonialsPage() {
 
 
                                                 <img
-                                                    src={
-                                                        item.image
-                                                            ? `/${item.image}`
-                                                            : "/default-user.png"
-                                                    }
+                                                    src={item.image || "/default-user.png"}
+
                                                     alt={item.name}
                                                     className="
                                                     h-14

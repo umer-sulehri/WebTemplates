@@ -264,15 +264,10 @@ export default function ServicesPage() {
 
                                             >
 
-                                                <Image
+                                                <img
                                                     src={service.image}
-
                                                     alt={service.title}
-
-                                                    fill
-
-                                                    className="object-cover transition-all duration-700 group-hover:scale-110"
-
+                                                    className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
                                                 />
 
                                                 <div
@@ -568,17 +563,11 @@ export default function ServicesPage() {
                                             >
 
                                                 <Image
-
                                                     src={tech.logo}
-
                                                     alt={tech.name}
-
                                                     width={65}
-
                                                     height={65}
-
                                                     className="object-contain"
-
                                                 />
 
                                             </motion.div>

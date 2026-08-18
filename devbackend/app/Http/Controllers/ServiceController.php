@@ -10,9 +10,17 @@ class ServiceController extends Controller
     // Get All Services
     public function index()
     {
-        return response()->json(
-            Service::latest()->get()
-        );
+        $services = Service::latest()->get();
+
+        $services->transform(function ($service) {
+            if ($service->image) {
+                $service->image = asset('storage/' . $service->image);
+            }
+
+            return $service;
+        });
+
+        return response()->json($services);
     }
 
 
@@ -23,20 +31,24 @@ class ServiceController extends Controller
             'title' => 'required',
             'description' => 'required',
             'learnmore' => 'required',
+            'icon' => 'required',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        $image = $request->file('image')->store('services', 'public');
 
         $service = Service::create([
             'title' => $request->title,
             'description' => $request->description,
             'learnmore' => $request->learnmore,
             'icon' => $request->icon,
-            'image' => $request->image,
-            'status' => 1
+            'image' => $image,
+            'status' => 1,
         ]);
 
         return response()->json([
             'message' => 'Service Added Successfully',
-            'service' => $service
+            'service' => $service,
         ]);
     }
 
