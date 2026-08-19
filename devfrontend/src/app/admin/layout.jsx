@@ -11,11 +11,11 @@ export default function AdminLayout({ children }) {
                 <div className="flex flex-1 flex-col overflow-hidden">
                     <Navbar />
 
-                    <main className="flex-1 min-h-0 p-8">
+                    <main className="flex-1  p-8">
                         {children}
                     </main>
                 </div>
             </div>
         </AuthGuard>
     );
-}
+};

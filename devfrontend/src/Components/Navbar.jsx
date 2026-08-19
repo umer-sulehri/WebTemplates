@@ -23,7 +23,7 @@ export default function Navbar() {
 
     const [open, setOpen] = useState(false);
 
-    
+
     return (
 
         <motion.nav
@@ -43,12 +43,12 @@ export default function Navbar() {
                 ease: "easeOut"
             }}
 
-            className="sticky top-0 z-40 w-full"
+            className="sticky top-0 z-40 w-full mb-4 mt-2"
 
         >
 
 
-            <div className="mx-auto max-w-7xl px-6 pt-4">
+            <div className="mx-auto max-w-7xl px-6 pt-4 ">
 
 
                 <div
